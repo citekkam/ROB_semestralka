@@ -54,7 +54,7 @@ def main():
     img_max_width = calibration["max_width"]
 
     # Load image and preprocess
-    frame = cv2.imread(str(Path(__file__).parent / "aruco.jpg"))
+    frame = cv2.imread("/home/student/Desktop/dkl_rob/ROB_semestralka/images/image_003.png")
     frame = max_resize(frame, max_width=img_max_width)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
