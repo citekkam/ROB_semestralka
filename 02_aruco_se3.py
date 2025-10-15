@@ -60,7 +60,7 @@ def main():
 
     # Detect makers
     aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-    detector = cv2.aruco.ArucoDetector(aruco_dict)
+    detector = cv2.aruco.ArucoDetector(aruco_dict)  
     corners, ids, rejected = detector.detectMarkers(gray)
 
     # Draw markers
