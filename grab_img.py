@@ -1,7 +1,7 @@
 import cv2
 import os
 import re
-from ctu_rcs import CRS97
+from ctu_crs import CRS97
 
 robot = CRS97()
 
