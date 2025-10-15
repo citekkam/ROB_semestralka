@@ -8,12 +8,11 @@ import numpy as np
 from ctu_crs import CRS97
 
 robot = CRS97()
-robot.initialize()
+robot.initialize(robots_home=False)
+robot.soft_home()
 
 q0 = robot.q_home
-for i in range(len(q0)):
-    q = q0.copy()
-    q[i] += np.deg2rad(10)
-    robot.move_to_q(q)
+q0[1] = 0   
+robot.move_to_q(q0)
 
 robot.close()
