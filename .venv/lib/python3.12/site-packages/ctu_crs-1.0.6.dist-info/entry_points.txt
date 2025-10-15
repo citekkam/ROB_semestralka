@@ -1,0 +1,3 @@
+[console_scripts]
+move_crs93 = ctu_crs.scripts.move_crs93:main
+move_crs97 = ctu_crs.scripts.move_crs97:main
