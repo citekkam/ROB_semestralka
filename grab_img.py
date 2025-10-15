@@ -36,3 +36,6 @@ if img is not None:
 
 else:
     print("⚠️ No image captured. Skipping save.")
+
+
+robot.close()
