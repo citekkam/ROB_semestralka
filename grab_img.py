@@ -1,6 +1,11 @@
 import cv2
 import os
 import re
+from ctu_rcs import CRS97
+
+robot = CRS97()
+
+robot.initialize()
 
 # Grab an image from the camera
 img = robot.grab_image()
