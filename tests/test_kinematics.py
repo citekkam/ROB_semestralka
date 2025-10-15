@@ -5,7 +5,7 @@
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 #
 
-from ctu_crs.crs93 import CRS93
+from ctu_crs.crs93 import CRS93 # src have to be removed
 import numpy as np
 import unittest
 
