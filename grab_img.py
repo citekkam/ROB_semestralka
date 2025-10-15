@@ -5,7 +5,7 @@ from ctu_crs import CRS97
 
 robot = CRS97()
 
-robot.initialize()
+robot.initialize(home = False)
 
 # Grab an image from the camera
 img = robot.grab_image()
