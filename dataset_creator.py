@@ -1,37 +1,69 @@
 import numpy as np
-from PIL import Image
+import cv2
 import os
 
-# --- 1️⃣ Funkce pro automatické pojmenování souboru ---
-def next_filename(prefix="data", ext=".npz"):
+# --- 1️⃣ Funkce pro automatické pojmenování ---
+def next_filename(folder="exporty", prefix="data", ext=".yaml"):
+    os.makedirs(folder, exist_ok=True)
     i = 1
     while True:
-        filename = f"{prefix}_{i}{ext}"
+        filename = os.path.join(folder, f"{prefix}_{i}{ext}")
         if not os.path.exists(filename):
             return filename
         i += 1
 
-# --- 2️⃣ Vytvoření matic ---
-A = np.array([[1, 2, 3],
-              [4, 5, 6]])
-B = np.array([[7, 8],
-              [9, 10]])
 
-# --- 3️⃣ Načtení nebo vytvoření obrázku ---
-# Pokud máš vlastní obrázek, odkomentuj tento řádek:
-# img = np.array(Image.open("obrazek.jpg"))
+# --- 2️⃣ Formátování matice do textu ---
+def format_array(arr):
+    """Vrátí pole jako hezky zformátovaný text podobný numpy výstupu."""
+    if arr.ndim == 1:
+        return "[" + " ".join(f"{x: .8e}" for x in arr) + "]"
+    elif arr.ndim == 2:
+        rows = ["[" + " ".join(f"{x: .8e}" for x in row) + "]" for row in arr]
+        return "[\n " + "\n ".join(rows) + "\n]"
+    else:
+        return str(arr)
 
-# Jinak se vytvoří náhodný obrázek:
-img = np.random.randint(0, 255, (100, 100, 3), dtype=np.uint8)
 
-# --- 4️⃣ Získání unikátního jména souboru ---
-filename = next_filename(prefix="data", ext=".npz")
+# --- 3️⃣ Hlavní funkce pro uložení ---
+def uloz_data(robot_q, transformation_matrix, obrazek, folder="exporty", prefix="data"):
+    """
+    Uloží dvě matice do .yaml souboru v textovém formátu a obrázek jako .png.
+    """
+    filename_yaml = next_filename(folder=folder, prefix=prefix, ext=".yaml")
+    filename_png = filename_yaml.replace(".yaml", ".png")
 
-# --- 5️⃣ Uložení dat ---
-np.savez(filename, obrazek=img, matice_A=A, matice_B=B)
-print(f"✅ Obrázek a matice byly uloženy do souboru: {filename}")
+    # --- Vytvoření obsahu YAML ---
+    text = ""
+    text += "Robot_pos_q:  " + format_array(robot_q) + "\n"
+    text += "transformacni_matic: " + format_array(transformation_matrix) + "\n"
 
-# --- 6️⃣ Uložení obrázku i jako PNG se stejným číslem ---
-png_name = filename.replace(".npz", ".png")
-Image.fromarray(img).save(png_name)
-print(f"✅ Obrázek uložen jako: {png_name}")
+    # --- Uložení do souboru ---
+    with open(filename_yaml, "w") as f:
+        f.write(text)
+    print(f"✅ Matice uloženy do: {filename_yaml}")
+
+    # --- Uložení obrázku ---
+    cv2.imwrite(filename_png, obrazek)
+    print(f"✅ Obrázek uložen jako: {filename_png}")
+
+    return filename_yaml, filename_png
+
+
+# --- 4️⃣ Příklad použití ---
+if __name__ == "__main__":
+    robot_q = np.array([
+        1.25663706e-04, -1.15965610e+00, -1.54057421e+00,
+        6.22097555e-05, -4.34796423e-01, -3.11048778e-05
+    ])
+
+    transformation_matrix = np.array([
+        [-9.99978439e-01, -1.00519685e-04,  6.56587886e-03,  4.20952110e-01],
+        [-1.00344376e-04,  9.99999995e-01,  2.70294453e-05,  5.48951742e-05],
+        [-6.56588154e-03,  2.63700136e-05, -9.99978444e-01,  5.22593112e-02],
+        [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  1.00000000e+00]
+    ])
+
+    obrazek = np.random.randint(0, 255, (100, 100, 3), dtype=np.uint8)
+
+    uloz_data(robot_q, transformation_matrix, obrazek)
