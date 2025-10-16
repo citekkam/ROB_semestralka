@@ -1,6 +1,7 @@
 import cv2
 import os
 import re
+from pathlib import Path
 from ctu_crs import CRS93
 
 robot = CRS93()
@@ -13,11 +14,11 @@ img = robot.grab_image()
 if img is not None:
     print(f"✅ Successfully grabbed image with shape: {img.shape}")
 
-    save_dir = "ArUco_codes"
-    os.makedirs(save_dir, exist_ok=True)
+    save_dir = Path(__file__).parent / "ArUco_codes"
+    save_dir.mkdir(exist_ok=True)
 
     # Find the next available image number
-    existing_files = [f for f in os.listdir(save_dir) if f.startswith("image_") and f.endswith(".png")]
+    existing_files = [f.name for f in save_dir.iterdir() if f.name.startswith("image_") and f.name.endswith(".png")]
     
     if existing_files:
         # Extract numbers using regex

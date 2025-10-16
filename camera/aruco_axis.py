@@ -8,7 +8,7 @@ SQUARES_X, SQUARES_Y = 5, 5
 SQUARE_LEN = 0.025   # meters (25 mm)
 MARKER_LEN = 0.018   # meters (18 mm)
 
-IMG_DIR = Path(__file__).parent / "camera" / "ArUco_codes"  # folder with your calibration images
+IMG_DIR = Path(__file__).parent / "ArUco_codes"  # folder with your calibration images
 EXTS = {".png", ".jpg", ".jpeg"}       # accepted extensions
 
 # --- Build file list without glob ---
@@ -90,7 +90,7 @@ data = {
     "camera_matrix": {"rows": 3, "cols": 3, "dt": "d", "data": K.flatten().tolist()},
     "dist_coeffs":   {"rows": 1, "cols": len(D), "dt": "d", "data": D.flatten().tolist()},
 }
-calib_path = Path(__file__).parent / "camera" / "calib.yaml"
+calib_path = Path(__file__).parent / "calib.yaml"
 with open(calib_path, "w") as f:
     yaml.dump(data, f)
 print(f"Wrote {calib_path}")

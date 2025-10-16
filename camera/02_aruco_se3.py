@@ -9,7 +9,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-from perception_utils import max_resize
+from ROB_semestralka.camera.perception_utils import max_resize
 
 
 def estimatePoseSingleMarkers(corners, marker_size, mtx, distortion):
@@ -48,7 +48,9 @@ def estimatePoseSingleMarkers(corners, marker_size, mtx, distortion):
 
 def main():
     # Load calibration saved in 02_calibration.py
-    calibration = np.load("calibration.npz")
+    from pathlib import Path
+    calib_path = Path(__file__).parent / "calibration.npz"
+    calibration = np.load(calib_path)
     K = calibration["K"]
     distortion = calibration["dist"]
     img_max_width = calibration["max_width"]
