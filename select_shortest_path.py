@@ -14,7 +14,7 @@ def normalize_angle(angle):
     return np.arctan2(np.sin(angle), np.cos(angle))
 
 
-def compute_joint_distance(q_current, q_target):
+def compute_joint_distance(q_current, q_target, joint_weights=None):
     """
     Vypočítá vzdálenost mezi dvěma konfiguracemi robota v kloubovém prostoru.
     Bere v úvahu cyklickou povahu úhlů (normalizuje rozdíly úhlů).
@@ -22,44 +22,54 @@ def compute_joint_distance(q_current, q_target):
     Args:
         q_current: Aktuální konfigurace robota (6 kloubů)
         q_target: Cílová konfigurace robota (6 kloubů)
+        joint_weights: Váhy pro jednotlivé klouby (None = [1,1,1,1,1,1])
+                      Vyšší váha = větší penalizace pohybu daného kloubu
     
     Returns:
-        Euklidovská vzdálenost v kloubovém prostoru
+        Vážená Euklidovská vzdálenost v kloubovém prostoru
     """
+    # Výchozí váhy - penalizujeme klouby 3 a 5 (indexy 3 a 5)
+    if joint_weights is None:
+        # Klouby 3 a 5 mají vyšší váhu (10x), aby se preferovaly konfigurace
+        # s menší změnou těchto kloubů
+        joint_weights = np.array([1.0, 1.0, 1.0, 10.0, 1.0, 10.0])
+    
     # Vypočítáme rozdíly a normalizujeme je
     diff = np.array(q_target) - np.array(q_current)
     
     # Normalizujeme rozdíly úhlů do rozsahu [-pi, pi]
     normalized_diff = np.array([normalize_angle(d) for d in diff])
     
-    # Vrátíme Euklidovskou vzdálenost
-    return np.linalg.norm(normalized_diff)
+    # Aplikujeme váhy na jednotlivé klouby
+    weighted_diff = normalized_diff * joint_weights
+    
+    # Vrátíme váženou Euklidovskou vzdálenost
+    return np.linalg.norm(weighted_diff)
 
 
-def find_shortest_path(q_current, q_targets):
+def find_shortest_path(q_current, q_targets, joint_weights=None):
     """
     Najde nejkratší cestu z aktuální pozice do jedné z cílových pozic.
     
     Args:
         q_current: Aktuální konfigurace robota (array 6 prvků)
         q_targets: Seznam možných cílových konfigurací (list of arrays)
+        joint_weights: Váhy pro jednotlivé klouby
     
     Returns:
         tuple: (index nejbližší konfigurace, nejbližší konfigurace, vzdálenost)
     """
     distances = []
-    
     for i, q_target in enumerate(q_targets):
-        dist = compute_joint_distance(q_current, q_target)
-        distances.append(dist)
+        dist = compute_joint_distance(q_current, q_target, joint_weights)
+        diff = np.array(q_target) - np.array(q_current)
+        normalized_diff = np.array([normalize_angle(d) for d in diff])
+        distances.append((i, dist, normalized_diff))
         print(f"Konfigurace {i}: vzdálenost = {dist:.6f} rad")
-    
-    # Najdeme index s minimální vzdáleností
-    min_index = np.argmin(distances)
-    min_distance = distances[min_index]
-    best_config = q_targets[min_index]
-    
-    return min_index, best_config, min_distance
+        print(f"  Δq[3] = {normalized_diff[3]:+.6f} rad, Δq[5] = {normalized_diff[5]:+.6f} rad")
+    # Seřadíme indexy podle vzdálenosti
+    sorted_distances = sorted(distances, key=lambda x: x[1])
+    return sorted_distances
 
 
 if __name__ == "__main__":
@@ -92,20 +102,19 @@ if __name__ == "__main__":
     print("=" * 70)
     print(f"\nAktuální poloha robota:")
     print(f"  q = {robot_get_q}")
+    print(f"\nPenalizace kloubů:")
+    print(f"  Kloub 3 (index 3): 10x penalizace")
+    print(f"  Kloub 5 (index 5): 10x penalizace")
     print(f"\nVypočítávám vzdálenosti ke všem možným konfiguracím...\n")
     
-    # Najdeme nejkratší cestu
-    best_index, best_config, min_distance = find_shortest_path(robot_get_q, robot_qs)
+    # Váhy pro klouby - silná penalizace pro klouby 3 a 5
+    joint_weights = np.array([1.0, 1.0, 1.0, 10.0, 1.0, 10.0])
     
+    # Získáme seřazené indexy podle vzdálenosti
+    sorted_distances = find_shortest_path(robot_get_q, robot_qs, joint_weights)
     print("\n" + "=" * 70)
-    print("VÝSLEDEK")
+    print("SEŘAZENÉ INDEXY KONFIGURACÍ PODLE VZDÁLENOSTI")
     print("=" * 70)
-    print(f"Nejbližší konfigurace: index {best_index}")
-    print(f"Vzdálenost: {min_distance:.6f} rad")
-    print(f"\nCílová konfigurace:")
-    print(f"  q_target = {best_config}")
-    print(f"\nRozdíl (normalizovaný):")
-    diff = best_config - robot_get_q
-    normalized_diff = np.array([normalize_angle(d) for d in diff])
-    print(f"  Δq = {normalized_diff}")
+    for idx, dist, normalized_diff in sorted_distances:
+        print(f"Index: {idx}, Vzdálenost: {dist:.6f} rad, Δq[3]: {normalized_diff[3]:+.6f} rad, Δq[5]: {normalized_diff[5]:+.6f} rad")
     print("=" * 70)
