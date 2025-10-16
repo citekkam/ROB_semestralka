@@ -38,4 +38,4 @@ else:
     print("⚠️ No image captured. Skipping save.")
 
 
-robot.close()
+# robot.close()
