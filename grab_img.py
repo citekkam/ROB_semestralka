@@ -13,7 +13,7 @@ img = robot.grab_image()
 if img is not None:
     print(f"✅ Successfully grabbed image with shape: {img.shape}")
 
-    save_dir = "images"
+    save_dir = "ArUco_codes"
     os.makedirs(save_dir, exist_ok=True)
 
     # Find the next available image number
@@ -37,5 +37,5 @@ if img is not None:
 else:
     print("⚠️ No image captured. Skipping save.")
 
-
+robot.release()
 # robot.close()
