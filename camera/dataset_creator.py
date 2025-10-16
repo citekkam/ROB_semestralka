@@ -1,15 +1,18 @@
 import numpy as np
 import cv2
 import os
+from pathlib import Path
 
 # --- 1️⃣ Funkce pro automatické pojmenování ---
 def next_filename(folder="exporty", prefix="data", ext=".yaml"):
-    os.makedirs(folder, exist_ok=True)
+    # Vytvoříme cestu relativně ke složce camera/
+    base_path = Path(__file__).parent / folder
+    base_path.mkdir(exist_ok=True)
     i = 1
     while True:
-        filename = os.path.join(folder, f"{prefix}_{i}{ext}")
-        if not os.path.exists(filename):
-            return filename
+        filename = base_path / f"{prefix}_{i}{ext}"
+        if not filename.exists():
+            return str(filename)
         i += 1
 
 

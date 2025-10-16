@@ -99,12 +99,12 @@ cv2.putText(comparison, "UNDISTORTED", (w_display + 10, 30), font, 1, (0, 255, 0
 cv2.imshow("Original vs Undistorted", comparison)
 cv2.imshow("Difference (Enhanced 5x)", diff_resized)
 
-print("\nStiskněte libovolnou klávesu pro uzavření oken...")
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# print("\nStiskněte libovolnou klávesu pro uzavření oken...")
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 # Uložíme výsledky
-output_dir = Path("distortion_analysis")
+output_dir = Path(__file__).parent / "distortion_analysis"
 output_dir.mkdir(exist_ok=True)
 
 cv2.imwrite(str(output_dir / "original.png"), img)
