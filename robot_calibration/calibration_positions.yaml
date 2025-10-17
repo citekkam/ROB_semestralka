@@ -1,0 +1,41 @@
+# Calibration positions for robot hand-eye calibration
+# 9 positions in a 3x3 grid to cover the workspace
+# Format: [x, y, z, roll, pitch, yaw]
+# - x, y, z in meters
+# - roll, pitch, yaw in radians
+
+# Position 1 - Top Left
+position_1:
+  pose: [0.35, 0.10, 0.25, 0.0, -1.57, 0.0]
+
+# Position 2 - Top Center  
+position_2:
+  pose: [0.40, 0.00, 0.25, 0.0, -1.57, 0.0]
+
+# Position 3 - Top Right
+position_3:
+  pose: [0.35, -0.10, 0.25, 0.0, -1.57, 0.0]
+
+# Position 4 - Middle Left
+position_4:
+  pose: [0.35, 0.10, 0.20, 0.0, -1.57, 0.0]
+
+# Position 5 - Center
+position_5:
+  pose: [0.40, 0.00, 0.20, 0.0, -1.57, 0.0]
+
+# Position 6 - Middle Right
+position_6:
+  pose: [0.35, -0.10, 0.20, 0.0, -1.57, 0.0]
+
+# Position 7 - Bottom Left
+position_7:
+  pose: [0.35, 0.10, 0.15, 0.0, -1.57, 0.0]
+
+# Position 8 - Bottom Center
+position_8:
+  pose: [0.40, 0.00, 0.15, 0.0, -1.57, 0.0]
+
+# Position 9 - Bottom Right
+position_9:
+  pose: [0.35, -0.10, 0.15, 0.0, -1.57, 0.0]
