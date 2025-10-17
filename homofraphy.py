@@ -10,22 +10,35 @@ import numpy as np
 import cv2  # noqa
 from PIL import Image
 from se3 import SE3
+from so3 import SO3
 
 import os
 import yaml
 from typing import List, Tuple, Union
 
+
+def hom2se3(T : ArrayLike) -> SE3:
+    R = SO3([
+        [T[0, 0], T[0, 1], T[0, 2]],
+        [T[1, 0], T[1, 1], T[1, 2]],
+        [T[2, 0], T[2, 1], T[2, 2]]
+    ])
+    t = np.array([
+        T[0, 3], T[1, 3], T[2, 3]
+    ])
+    return SE3(rotation= R, translation = t)
+
 # Dark threshold for detecting circle
 DARK_TRESH = 150
 # SE3 from gripper to center of circle
-CRC_OFF = SE3([
-    [1, 0, 0, 1.35]
-    [0, 1, 0, 0]
-    [0, 0, 1, 0]
+CRC_OFF = hom2se3(np.array([
+    [1, 0, 0, 1.35],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
     [0, 0, 0, 1]
-])
+]))
 
-def load_image_yaml_pairs(folder: str = "exporty") -> Tuple[List[ArrayLike], List[dict]]:
+def load_image_yaml_pairs(folder: str = "/home/muflonn/fel/semestr5/rob/semesralka/exporty") -> Tuple[List[ArrayLike], List[dict]]:
     """
     Load corresponding PNG images and YAML files from a folder.
 
@@ -77,6 +90,8 @@ def load_image_yaml_pairs(folder: str = "exporty") -> Tuple[List[ArrayLike], Lis
 
     return images, yaml_data
 
+
+
 def correct_eff_pos(T_B2G: SE3):
     """
     Correct transformation of end effector. For homography is neccesarrry to 
@@ -121,7 +136,7 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
 
         circles = cv2.HoughCircles(img_gray, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                 param1=100, param2=30,
-                                minRadius=1, maxRadius=300)
+                                minRadius=20, maxRadius=300)
         
 
         if circles is not None:
@@ -131,26 +146,40 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
                 # circle center
                 cv2.circle(img, center, 1, (0, 100, 100), 3)
                 # circle outline
+                radius = i[2]
+                cv2.circle(img, center, radius, (255, 0, 255), 3)
                 centers.append(center)
         
         
-        # cv2.imshow("detected circles", img)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
+
+        show_img = cv2.resize(img, (1200, 800))
+        cv2.imshow("detected circles", show_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
     # todo HW03: Find homography using cv2.findHomography. Use the hoop positions and circle centers.
 
     # print(hoop_positions)
     hoop_vectors = []
     for i in range(len(hoop_positions)):
-        hoop_vectors.append(hoop_positions[i]["translation_vector"][0:2])
+        print(hoop_positions[i]["transformacni_matic"])
+        trans = hom2se3(np.array(hoop_positions[i]["transformacni_matic"]))
+        trans = trans * CRC_OFF
+        hoop_vectors.append(trans.translation[:2])
 
-    print(centers)
-    print(hoop_vectors)
+
     centers = np.array(centers, dtype=np.float32)
     hoop_vectors = np.array(hoop_vectors, dtype=np.float32)
+    print(len(centers))
+    print(len(hoop_vectors))
+    
     H , _ = cv2.findHomography(centers, hoop_vectors)
     return H
 
 
 if __name__ == "__main__":
+    print(CRC_OFF)
     imgs, hoop_pos = load_image_yaml_pairs()
+
+    # print(imgs, hoop_pos)
+    H = find_hoop_homography(imgs, hoop_pos)
+    print(H)
