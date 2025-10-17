@@ -9,7 +9,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-from perception_utils import max_resize
+from perception import max_resize
 
 
 def estimatePoseSingleMarkers(corners, marker_size, mtx, distortion):
