@@ -1,0 +1,7 @@
+<library path="lib/libikt6_iiwa_kinematics_plugin">
+  <class name="ikt6/IKT6IIWAKinematicsPlugin" type="ikt6::IKT6KinematicsPlugin" base_class_type="kinematics::KinematicsBase">
+    <description>
+      A implementation of kinematics as a plugin based on IKT6 for iiwa.
+    </description>
+  </class>
+</library>
