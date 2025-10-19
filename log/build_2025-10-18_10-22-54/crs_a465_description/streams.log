@@ -1,0 +1,19 @@
+[0.010s] Invoking command in '/home/david/School/rob/Semestralka/ROB_semestralka/build/crs_a465_description': CMAKE_PREFIX_PATH=/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /usr/bin/cmake /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/david/School/rob/Semestralka/ROB_semestralka/install/crs_a465_description
+[0.058s] -- The C compiler identification is GNU 11.4.0
+[0.100s] -- The CXX compiler identification is GNU 11.4.0
+[0.106s] -- Detecting C compiler ABI info
+[0.165s] -- Detecting C compiler ABI info - done
+[0.169s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.170s] -- Detecting C compile features
+[0.170s] -- Detecting C compile features - done
+[0.172s] -- Detecting CXX compiler ABI info
+[0.240s] -- Detecting CXX compiler ABI info - done
+[0.245s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.245s] -- Detecting CXX compile features
+[0.245s] -- Detecting CXX compile features - done
+[0.246s] -- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.566s] -- Found Python3: /home/david/miniconda3/bin/python3 (found version "3.13.5") found components: Interpreter 
+[0.623s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.700s] -- Configuring done
+[0.702s] -- Generating done
+[0.704s] -- Build files have been written to: /home/david/School/rob/Semestralka/ROB_semestralka/build/crs_a465_description

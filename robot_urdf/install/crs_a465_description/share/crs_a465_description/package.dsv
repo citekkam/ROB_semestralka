@@ -1,0 +1,8 @@
+source;share/crs_a465_description/hook/cmake_prefix_path.ps1
+source;share/crs_a465_description/hook/cmake_prefix_path.dsv
+source;share/crs_a465_description/hook/cmake_prefix_path.sh
+source;share/crs_a465_description/local_setup.bash
+source;share/crs_a465_description/local_setup.dsv
+source;share/crs_a465_description/local_setup.ps1
+source;share/crs_a465_description/local_setup.sh
+source;share/crs_a465_description/local_setup.zsh

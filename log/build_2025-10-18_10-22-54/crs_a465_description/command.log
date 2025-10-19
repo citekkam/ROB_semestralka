@@ -1,0 +1,1 @@
+Invoking command in '/home/david/School/rob/Semestralka/ROB_semestralka/build/crs_a465_description': CMAKE_PREFIX_PATH=/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /usr/bin/cmake /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/david/School/rob/Semestralka/ROB_semestralka/install/crs_a465_description

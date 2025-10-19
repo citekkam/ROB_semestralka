@@ -1,0 +1,33 @@
+[0.007s] Invoking command in '/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description': CONDA_PROMPT_MODIFIER=(base) /usr/bin/cmake /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf -DCMAKE_INSTALL_PREFIX=/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description
+[0.067s] -- The C compiler identification is GNU 11.4.0
+[0.116s] -- The CXX compiler identification is GNU 11.4.0
+[0.124s] -- Detecting C compiler ABI info
+[0.186s] -- Detecting C compiler ABI info - done
+[0.190s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.191s] -- Detecting C compile features
+[0.192s] -- Detecting C compile features - done
+[0.194s] -- Detecting CXX compiler ABI info
+[0.263s] -- Detecting CXX compiler ABI info - done
+[0.267s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.267s] -- Detecting CXX compile features
+[0.268s] -- Detecting CXX compile features - done
+[0.277s] [31mCMake Error at CMakeLists.txt:9 (find_package):
+[0.277s]   By not providing "Findament_cmake.cmake" in CMAKE_MODULE_PATH this project
+[0.277s]   has asked CMake to find a package configuration file provided by
+[0.277s]   "ament_cmake", but CMake did not find one.
+[0.277s] 
+[0.277s]   Could not find a package configuration file provided by "ament_cmake" with
+[0.277s]   any of the following names:
+[0.277s] 
+[0.277s]     ament_cmakeConfig.cmake
+[0.277s]     ament_cmake-config.cmake
+[0.277s] 
+[0.277s]   Add the installation prefix of "ament_cmake" to CMAKE_PREFIX_PATH or set
+[0.277s]   "ament_cmake_DIR" to a directory containing one of the above files.  If
+[0.277s]   "ament_cmake" provides a separate development package or SDK, be sure it
+[0.277s]   has been installed.
+[0.277s] 
+[0.278s] [0m
+[0.278s] -- Configuring incomplete, errors occurred!
+[0.278s] See also "/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description/CMakeFiles/CMakeOutput.log".
+[0.280s] Invoked command in '/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description' returned '1': CONDA_PROMPT_MODIFIER=(base) /usr/bin/cmake /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf -DCMAKE_INSTALL_PREFIX=/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description

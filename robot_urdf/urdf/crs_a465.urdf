@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<robot name="crs_a465">
+
+  <!-- ===================== LINKS ===================== -->
+  <link name="base_link">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.1"/></geometry>
+      <material name="grey"><color rgba="0.6 0.6 0.6 1"/></material>
+    </visual>
+  </link>
+
+  <link name="link1">
+    <visual>
+      <geometry><cylinder length="0.44" radius="0.04"/></geometry>
+      <origin xyz="0 0 0.22"/>
+      <material name="blue"><color rgba="0.2 0.2 0.8 1"/></material>
+    </visual>
+  </link>
+
+  <link name="link2">
+    <visual>
+      <geometry><cylinder length="0.305" radius="0.035"/></geometry>
+      <origin xyz="0 0 0.1525"/>
+      <material name="red"><color rgba="0.8 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+
+  <link name="link3">
+    <visual>
+      <geometry><cylinder length="0.33" radius="0.03"/></geometry>
+      <origin xyz="0 0 0.165"/>
+      <material name="green"><color rgba="0.2 0.8 0.2 1"/></material>
+    </visual>
+  </link>
+
+  <link name="link4">
+    <visual>
+      <geometry><cylinder length="0.211" radius="0.025"/></geometry>
+      <origin xyz="0 0 0.1055"/>
+      <material name="orange"><color rgba="0.9 0.5 0.2 1"/></material>
+    </visual>
+  </link>
+
+  <link name="tool_link">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.015"/></geometry>
+      <origin xyz="0 0 0.025"/>
+      <material name="black"><color rgba="0.1 0.1 0.1 1"/></material>
+    </visual>
+  </link>
+
+  <!-- ===================== JOINTS ===================== -->
+
+  <!-- joint1 : +z axis -->
+  <joint name="joint1" type="revolute">
+    <parent link="base_link"/>
+    <child  link="link1"/>
+    <origin xyz="0 0 0"/>
+    <axis xyz="0 0 1"/> <!-- + direction -->
+    <limit lower="-3.054" upper="3.054" effort="50" velocity="2"/>
+  </joint>
+
+  <!-- joint2 : -y axis -->
+  <joint name="joint2" type="revolute">
+    <parent link="link1"/>
+    <child  link="link2"/>
+    <origin xyz="0 0 0.44"/>
+    <axis xyz="0 -1 0"/> <!-- direction = -1 -->
+    <limit lower="-1.571" upper="1.571" effort="50" velocity="2"/>
+  </joint>
+
+  <!-- joint3 : -y axis -->
+  <joint name="joint3" type="revolute">
+    <parent link="link2"/>
+    <child  link="link3"/>
+    <origin xyz="0 0 0.305"/>
+    <axis xyz="0 -1 0"/> <!-- direction = -1 -->
+    <limit lower="-1.919" upper="1.919" effort="50" velocity="2"/>
+  </joint>
+
+  <!-- joint4 : +x axis -->
+  <joint name="joint4" type="revolute">
+    <parent link="link3"/>
+    <child  link="link4"/>
+    <origin xyz="0 0 0.33"/>
+    <axis xyz="1 0 0"/> <!-- direction = +1 -->
+    <limit lower="-3.142" upper="3.142" effort="30" velocity="3"/>
+  </joint>
+
+  <!-- joint5 : -y axis -->
+  <joint name="joint5" type="revolute">
+    <parent link="link4"/>
+    <child  link="tool_link"/>
+    <origin xyz="0 0 0.211"/>
+    <axis xyz="0 -1 0"/> <!-- direction = -1 -->
+    <limit lower="-1.833" upper="1.833" effort="20" velocity="3"/>
+  </joint>
+
+  <!-- joint6 : +x axis -->
+  <joint name="joint6" type="revolute">
+    <parent link="tool_link"/>
+    <child  link="end_effector"/>
+    <origin xyz="0 0 0.05"/>
+    <axis xyz="1 0 0"/> <!-- direction = +1 -->
+    <limit lower="-3.142" upper="3.142" effort="10" velocity="3"/>
+  </joint>
+
+  <!-- dummy end effector -->
+  <link name="end_effector">
+    <visual>
+      <geometry><sphere radius="0.02"/></geometry>
+      <material name="silver"><color rgba="0.8 0.8 0.8 1"/></material>
+    </visual>
+  </link>
+
+</robot>

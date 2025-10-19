@@ -1,0 +1,24 @@
+[0.008s] Invoking command in '/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description': CMAKE_PREFIX_PATH=/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /usr/bin/cmake --build /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description -- -j16 -l16
+[0.047s] Invoked command in '/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /usr/bin/cmake --build /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description -- -j16 -l16
+[0.059s] Invoking command in '/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description': CMAKE_PREFIX_PATH=/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /usr/bin/cmake --install /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description
+[0.064s] -- Install configuration: ""
+[0.064s] -- Execute custom install script
+[0.065s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/urdf/crs_a465.urdf
+[0.065s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/launch/display.launch.py
+[0.065s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/rviz/crs_a465.rviz
+[0.065s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/ament_index/resource_index/package_run_dependencies/crs_a465_description
+[0.065s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/ament_index/resource_index/parent_prefix_path/crs_a465_description
+[0.065s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/environment/ament_prefix_path.sh
+[0.065s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/environment/ament_prefix_path.dsv
+[0.065s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/environment/path.sh
+[0.066s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/environment/path.dsv
+[0.066s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/local_setup.bash
+[0.066s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/local_setup.sh
+[0.066s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/local_setup.zsh
+[0.066s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/local_setup.dsv
+[0.066s] -- Symlinking: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/package.dsv
+[0.077s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/ament_index/resource_index/packages/crs_a465_description
+[0.077s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/cmake/crs_a465_descriptionConfig.cmake
+[0.077s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/cmake/crs_a465_descriptionConfig-version.cmake
+[0.077s] -- Up-to-date symlink: /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/install/crs_a465_description/share/crs_a465_description/package.xml
+[0.079s] Invoked command in '/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble CONDA_PROMPT_MODIFIER=(base) /usr/bin/cmake --install /home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/build/crs_a465_description
