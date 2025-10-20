@@ -295,7 +295,7 @@ def main():
     output_folder = str(output_folder)  # Convert back to string for compatibility
     
     # Configuration
-    joint_weights = np.array([1.0, 1.0, 1.0, 10.0, 1.0, 10.0])
+    joint_weights = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     
     # Load calibration positions
     print(f"📂 Loading calibration positions from: {positions_file}")

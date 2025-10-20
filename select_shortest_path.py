@@ -32,7 +32,7 @@ def compute_joint_distance(q_current, q_target, joint_weights=None):
     if joint_weights is None:
         # Klouby 3 a 5 mají vyšší váhu (10x), aby se preferovaly konfigurace
         # s menší změnou těchto kloubů
-        joint_weights = np.array([1.0, 1.0, 1.0, 10.0, 1.0, 10.0])
+        joint_weights = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     
     # Vypočítáme rozdíly a normalizujeme je
     diff = np.array(q_target) - np.array(q_current)
