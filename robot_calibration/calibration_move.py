@@ -87,10 +87,14 @@ def load_calibration_positions(yaml_file: str) -> list:
         data = yaml.safe_load(f)
     
     positions = []
-    for key in sorted(data.keys()):  # Sort to ensure consistent order
-        if 'position_' in key:
-            pose = np.array(data[key]['pose'])
-            positions.append((key, pose))
+    
+    # Sort keys numerically by extracting the position number
+    position_keys = [key for key in data.keys() if 'position_' in key]
+    sorted_keys = sorted(position_keys, key=lambda x: int(x.split('_')[1]))
+    
+    for key in sorted_keys:
+        pose = np.array(data[key]['pose'])
+        positions.append((key, pose))
     
     return positions
 
