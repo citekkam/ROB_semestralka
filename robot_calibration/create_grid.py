@@ -78,6 +78,9 @@ def generate_grid_positions(
     elif orientation == 'side':
         # Camera pointing to the side (yaw = 90°)
         roll, pitch, yaw = 0.0, 0.0, np.pi/2
+    elif orientation == 'flip':
+        # Flipped 180° (roll=180°, yaw=180°)
+        roll, pitch, yaw = np.pi, 0.0, np.pi
     elif orientation == 'none':
         # No rotation
         roll, pitch, yaw = 0.0, 0.0, 0.0
@@ -333,7 +336,7 @@ Examples:
     parser.add_argument('--center', type=float, nargs=3, metavar=('X', 'Y', 'Z'), 
                        help='Grid center position (x y z)')
     parser.add_argument('--orientation', type=str, 
-                       choices=['down', 'front', 'side', 'none'],
+                       choices=['down', 'front', 'side', 'flip', 'none'],
                        help='Camera orientation preset')
     parser.add_argument('--output', type=str, help='Output YAML file')
     parser.add_argument('--yes', '-y', action='store_true', 

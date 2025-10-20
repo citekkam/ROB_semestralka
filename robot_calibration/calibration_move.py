@@ -273,10 +273,22 @@ def main():
     # Setup paths
     script_dir = Path(__file__).parent
     positions_file = script_dir/ "robot_calibration" / "calibration_positions.yaml"
-    output_folder = str(script_dir / "calibration_data")
+    output_folder = Path(script_dir / "calibration_data")
+    
+    # Clear old data from calibration_data folder
+    if output_folder.exists():
+        print(f"🧹 Cleaning old calibration data from: {output_folder}")
+        # Remove all files in the folder
+        for file in output_folder.glob("*"):
+            if file.is_file():
+                file.unlink()
+                print(f"   Removed: {file.name}")
+        print(f"✅ Old data cleared")
+        print()
     
     # Create output folder if it doesn't exist
-    Path(output_folder).mkdir(exist_ok=True, parents=True)
+    output_folder.mkdir(exist_ok=True, parents=True)
+    output_folder = str(output_folder)  # Convert back to string for compatibility
     
     # Configuration
     joint_weights = np.array([1.0, 1.0, 1.0, 10.0, 1.0, 10.0])
