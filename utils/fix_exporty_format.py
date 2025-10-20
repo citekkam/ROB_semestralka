@@ -118,16 +118,16 @@ def fix_yaml_file(filepath):
 
 def main():
     # Najdeme všechny data_*.yaml soubory
-    exporty_dir = Path(__file__).parent / "exporty"
+    exporty_dir = Path(__file__).parent / ".."/ "robot_calibration" / "calibration_data"
     
     if not exporty_dir.exists():
         print(f"❌ Složka {exporty_dir} neexistuje!")
         return
     
-    yaml_files = sorted(exporty_dir.glob("data_*.yaml"))
+    yaml_files = sorted(exporty_dir.glob("calib_position_*_1.yaml"))
     
     if not yaml_files:
-        print(f"❌ Nenalezeny žádné soubory data_*.yaml v {exporty_dir}")
+        print(f"❌ Nenalezeny žádné soubory calib_position_*_1.yaml v {exporty_dir}")
         return
     
     print(f"Nalezeno {len(yaml_files)} souborů k opravě\n")
