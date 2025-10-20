@@ -4,7 +4,7 @@ from select_shortest_path import find_shortest_path
 # from ROB_semestralka.camera.dataset_creator import next_filename, uloz_data
 
 robot = CRS93()
-robot.initialize(home=False)
+robot.initialize()
 
 joint_weights = np.array([1.0, 1.0, 1.0, 10.0, 1.0, 10.0])
 
@@ -15,26 +15,26 @@ joint_weights = np.array([1.0, 1.0, 1.0, 10.0, 1.0, 10.0])
 
 
 
-# robot_q = robot.get_q()
+robot_q = robot.get_q()
 # # print(robot_q)
 
-# pose = robot.fk(robot.get_q())
+pose = robot.fk(robot.get_q())
 # print(pose)
 # pose[0][3] += 0.0
 # pose[1][3] += 0.0
-# pose[2][3] += 0.0
+pose[2][3] += 0.1
 # print(pose)
-# robot_qs = robot.ik(pose)
+robot_qs = robot.ik(pose)
 # print(robot_qs)
-# sorted_distances = find_shortest_path(robot_q, robot_qs, joint_weights)
+sorted_distances = find_shortest_path(robot_q, robot_qs, joint_weights)
 
 
 # idx,_,_ = sorted_distances[0]
 # print(idx)
-# print(robot_qs[idx])
+print(robot_qs[idx])
 
 # robot.move_to_q(robot_qs[idx])
-# robot.wait_for_motion_stop()
+robot.wait_for_motion_stop()
 
 # robot_q = robot.get_q()
 # print("Robot_pos_q: ",robot_q)

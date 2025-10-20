@@ -20,6 +20,8 @@ import yaml
 from pathlib import Path
 import sys
 
+from numpy.typing import ArrayLike
+
 # Add project root to sys.path before importing local packages
 ROOT_DIR = Path(__file__).resolve().parent.parent
 SRC_DIR = ROOT_DIR / "src"
@@ -176,43 +178,88 @@ def move_to_position_safe(robot, target_pose: np.ndarray, joint_weights: np.ndar
     Returns:
         bool: True if movement successful, False otherwise
     """
-    try:
-        # Get current robot position
-        current_q = robot.get_q()
-        
-        # Convert pose to transformation matrix
-        target_T = pose_to_transformation_matrix(target_pose)
-        
-        print(f"  Target pose [x,y,z,r,p,y]: [{target_pose[0]:.3f}, {target_pose[1]:.3f}, {target_pose[2]:.3f}, {target_pose[3]:.3f}, {target_pose[4]:.3f}, {target_pose[5]:.3f}]")
-        
-        # Get all IK solutions
-        ik_solutions = robot.ik(target_T)
-        
-        if len(ik_solutions) == 0:
-            print(f"  ⚠️  No IK solutions found for target pose")
-            return False
-        
-        print(f"  Found {len(ik_solutions)} IK solutions")
-        
-        # Find shortest path
-        sorted_distances = find_shortest_path(current_q, ik_solutions, joint_weights)
-        
-        # Select the closest solution
-        idx, distance, _ = sorted_distances[0]
-        best_q = ik_solutions[idx]
-        
-        print(f"  → Selected IK solution {idx} with distance {distance:.4f}")
-        print(f"  → Target joints: {best_q}")
-        
-        # Move to position
-        robot.move_to_q(best_q)
-        robot.wait_for_motion_stop()
-        
-        return True
-        
-    except Exception as e:
-        print(f"  ❌ Error during movement: {e}")
+    # Get current robot position
+    current_q = robot.get_q()
+    
+    # Convert pose to transformation matrix
+    target_T = pose_to_transformation_matrix(target_pose)
+
+    print(target_T)
+    
+    print(f"  Target pose [x,y,z,r,p,y]: [{target_pose[0]:.3f}, {target_pose[1]:.3f}, {target_pose[2]:.3f}, {target_pose[3]:.3f}, {target_pose[4]:.3f}, {target_pose[5]:.3f}]")
+    
+    # Get all IK solutions
+    ik_solutions = robot.ik(target_T)
+    
+    if len(ik_solutions) == 0:
+        print(f"  ⚠️  No IK solutions found for target pose")
         return False
+    
+    print(f"  Found {len(ik_solutions)} IK solutions")
+    
+    # Find shortest path
+    sorted_distances = find_shortest_path(current_q, ik_solutions, joint_weights)
+    
+    # # Select the closest solution
+    # idx, distance, _ = sorted_distances[0]
+    # best_q = ik_solutions[idx]
+    
+    # print(f"  → Selected IK solution {idx} with distance {distance:.4f}")
+    # print(f"  → Target joints: {best_q}")
+
+    for idx,distance, _ in sorted_distances:
+        q = ik_solutions[idx]
+        # check robot limit
+        if robot.in_limits(q):
+            # Move to position
+            print("q is:", q)
+            robot.move_to_q(q)
+            print("start moving")
+            robot.wait_for_motion_stop()
+            print("stop moving")
+            break
+        else:
+            print("robot limit are false ty debile!!!!!!!!!!!!", idx)
+                
+    return True
+
+def test_limits(j: float, i: int) -> bool:
+    """
+    Test if a joint angle is within limits
+    
+    Args:
+        robot: Robot parameters
+        j: Joint angle (with offset and direction applied)
+        i: Joint index (0-5)
+    
+    Returns:
+        True if within limits
+    """
+
+    lengths = np.array([440, 0, 305, 0, 330, 211.0])
+    offsets = np.array([0, 0, 0, 0, 0, 0.0])
+    directions = np.array([1, -1, -1, 1, -1, 1.0])
+    limits_max = np.deg2rad([175, 90, 110, 180, 105, 180])
+    limits_min = np.deg2rad([-175, -90, -110, -180, -105, -180])
+
+    j = j * directions[i] + offsets[i]
+    return limits_min[i] < j < limits_max[i]
+
+def check_robot_limit(J: ArrayLike) -> bool:
+    """
+    Test if a joint angle is within limits
+    
+    Args:
+        j: Joint angle (with offset and direction applied)
+    
+    Returns:
+        True if robot not limit
+    """
+    for i in range(len(J)):
+        j = J[i]
+        if test_limits(j,i):
+            return False
+    return True
 
 
 def main():
@@ -247,28 +294,32 @@ def main():
     # Initialize robot
     print("🤖 Initializing robot...")
     try:
-        # Define robot parameters - CRS93
-        lengths = np.array([330, 0, 305, 0, 330, 211], dtype=float)  # Link lengths in mm
-        offsets = np.array([0, 0, 0, 0, 0, 0], dtype=float)  # Joint offsets in radians
-        directions = np.array([1, -1, -1, 1, -1, 1], dtype=float)  # Joint directions
-        limits_max = np.deg2rad([175, 90, 110, 180, 105, 180])  # Max limits
-        limits_min = np.deg2rad([-175, -90, -110, -180, -105, -180])  # Min limits
+        # # Define robot parameters - CRS93
+        # lengths = np.array([330, 0, 305, 0, 330, 211], dtype=float)  # Link lengths in mm
+        # offsets = np.array([0, 0, 0, 0, 0, 0], dtype=float)  # Joint offsets in radians
+        # directions = np.array([1, -1, -1, 1, -1, 1], dtype=float)  # Joint directions
+        # limits_max = np.deg2rad([175, 90, 110, 180, 105, 180])  # Max limits
+        # limits_min = np.deg2rad([-175, -90, -110, -180, -105, -180])  # Min limits
         
-        # Define base and tool transforms (identity for now)
-        base = np.eye(4)
-        tool = np.eye(4)
+        # # Define base and tool transforms (identity for now)
+        # base = np.eye(4)
+        # tool = np.eye(4)
     
-        # Initialize robot
-        robot = ikt6_robot_init(
-            name="CRS93",
-            lengths=lengths,
-            offsets=offsets,
-            directions=directions,
-            limits_max=limits_max,
-            limits_min=limits_min,
-            base=base,
-            tool=tool
-        )
+        # # Initialize robot
+        # robot = ikt6_robot_init(
+        #     name="CRS93",
+        #     lengths=lengths,
+        #     offsets=offsets,
+        #     directions=directions,
+        #     limits_max=limits_max,
+        #     limits_min=limits_min,
+        #     base=base,
+        #     tool=tool
+        # )
+
+        robot = CRS93()
+        robot.initialize(home=False)
+
         print("✅ Robot initialized successfully")
         print()
     except Exception as e:
@@ -286,22 +337,22 @@ def main():
         
         # Move to position
         print(f"Moving to position...")
-        if not move_to_position_safe_test(robot, target_pose, joint_weights):
+        if not move_to_position_safe(robot, target_pose, joint_weights):
             print(f"❌ Failed to move to position {pos_name}")
             failed_captures += 1
             continue
         
         # Get actual robot position after movement
         # test
-        # actual_q = robot.get_q()
-        # print(f"Actual joint configuration: {actual_q}")
-        actual_q = prev_pose  # Use prev_pose from test function
+        actual_q = robot.get_q()
+        print(f"Actual joint configuration: {actual_q}")
+        # actual_q = prev_pose  # Use prev_pose from test function
         
         # Calculate transformation matrix
         # test
-        # transformation_matrix = robot.fk(actual_q)
-        # print(f"Transformation matrix calculated")
-        transformation_matrix = ikt6_dkt_T(robot, actual_q)
+        transformation_matrix = robot.fk(actual_q)
+        print(f"Transformation matrix calculated")
+        # transformation_matrix = ikt6_dkt_T(robot, actual_q)
         
         # Capture image
         print(f"📸 Capturing image...")
