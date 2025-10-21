@@ -8,6 +8,15 @@ Each transformation matrix represents a pose with:
 """
 
 import numpy as np
+import sys
+from pathlib import Path
+
+# Add parent directory to path to import SE3 and SO3
+sys.path.append(str(Path(__file__).parent.parent))
+
+from se3 import SE3
+from so3 import SO3
+from utils import print_trajectory_info
 
 
 # Rotation matrix with diagonal elements [-1, 1, -1]
@@ -18,43 +27,70 @@ ROTATION_MATRIX = np.array([
     [ 0.0,  0.0, -1.0]
 ])
 
+# Create the constant rotation as SO3 object
+ROTATION = SO3(ROTATION_MATRIX)
 
-def create_transformation_matrix(position):
-    """
-    Create a 4x4 transformation matrix from position and the constant rotation.
-    
-    Args:
-        position: array-like of shape (3,) representing [x, y, z]
-    
-    Returns:
-        4x4 numpy array representing the homogeneous transformation matrix
-    """
-    T = np.eye(4)
-    T[:3, :3] = ROTATION_MATRIX
-    T[:3, 3] = position
-    return T
+# ========== PUZZLE A TRAJECTORY ==========
+# Define trajectory points for Puzzle A as SE3 objects (global constants)
+PUZZLE_A_POINT_1 = SE3(translation=np.array([0.0, 0.0, 0.2]), rotation=ROTATION)
+PUZZLE_A_POINT_2 = SE3(translation=np.array([0.0, 0.0, 0.0]), rotation=ROTATION)
 
+# ========== PUZZLE B TRAJECTORY ==========
+# Define trajectory points for Puzzle B as SE3 objects (global constants)
+PUZZLE_B_POINT_1 = SE3(translation=np.array([0.07, 0.0, 0.2]), rotation=ROTATION)
+PUZZLE_B_POINT_2 = SE3(translation=np.array([0.07, 0.0, 0.15]), rotation=ROTATION)
+PUZZLE_B_POINT_3 = SE3(translation=np.array([0.0, 0.0, 0.08]), rotation=ROTATION)
+PUZZLE_B_POINT_4 = SE3(translation=np.array([0.0, 0.0, 0.0]), rotation=ROTATION)
 
-# Define trajectory points
-POINT_1 = create_transformation_matrix(np.array([0.07, 0.0, 0.2]))
-POINT_2 = create_transformation_matrix(np.array([0.07, 0.0, 0.15]))
-POINT_3 = create_transformation_matrix(np.array([0.0, 0.0, 0.08]))
-POINT_4 = create_transformation_matrix(np.array([0.0, 0.0, 0.0]))
-
-# Trajectory sequence
-TRAJECTORY_POINTS = [POINT_1, POINT_2, POINT_3, POINT_4]
+# ========== PUZZLE C TRAJECTORY ==========
+# Define trajectory points for Puzzle C as SE3 objects (global constants)
+# TODO: Define your Puzzle C points here
+PUZZLE_C_POINT_1 = SE3(translation=np.array([0.0, 0.0, 0.2]), rotation=ROTATION)
+PUZZLE_C_POINT_2 = SE3(translation=np.array([0.0, 0.0, 0.15]), rotation=ROTATION)
+PUZZLE_C_POINT_3 = SE3(translation=np.array([0.0, 0.0, 0.08]), rotation=ROTATION)
+PUZZLE_C_POINT_4 = SE3(translation=np.array([0.0, 0.0, 0.0]), rotation=ROTATION)
 
 
-def print_trajectory_info():
-    """Print information about the trajectory points."""
-    print("Trajectory Points:")
-    print("=" * 60)
-    for i, point in enumerate(TRAJECTORY_POINTS, 1):
-        print(f"\nPoint {i}:")
-        print(f"Position: {point[:3, 3]}")
-        print(f"Rotation matrix:\n{point[:3, :3]}")
-    print("=" * 60)
+# ========== PUZZLE D TRAJECTORY ==========
+# Define trajectory points for Puzzle D as SE3 objects (global constants)
+# TODO: Define your Puzzle D points here
+PUZZLE_D_POINT_1 = SE3(translation=np.array([0.0, 0.0, 0.2]), rotation=ROTATION)
+PUZZLE_D_POINT_2 = SE3(translation=np.array([0.0, 0.0, 0.15]), rotation=ROTATION)
+PUZZLE_D_POINT_3 = SE3(translation=np.array([0.0, 0.0, 0.08]), rotation=ROTATION)
+PUZZLE_D_POINT_4 = SE3(translation=np.array([0.0, 0.0, 0.0]), rotation=ROTATION)
+
+# ========== PUZZLE E TRAJECTORY ==========
+# Define trajectory points for Puzzle E as SE3 objects (global constants)
+# TODO: Define your Puzzle E points here
+PUZZLE_E_POINT_1 = SE3(translation=np.array([0.0, 0.0, 0.2]), rotation=ROTATION)
+PUZZLE_E_POINT_2 = SE3(translation=np.array([0.0, 0.0, 0.15]), rotation=ROTATION)
+PUZZLE_E_POINT_3 = SE3(translation=np.array([0.0, 0.0, 0.08]), rotation=ROTATION)
+PUZZLE_E_POINT_4 = SE3(translation=np.array([0.0, 0.0, 0.0]), rotation=ROTATION)
+
+# Trajectory sequence for Puzzle A
+TRAJECTORY_POINTS_PUZZLE_A = [PUZZLE_A_POINT_1, PUZZLE_A_POINT_2]
+
+# Trajectory sequence for Puzzle B
+TRAJECTORY_POINTS_PUZZLE_B = [PUZZLE_B_POINT_1, PUZZLE_B_POINT_2, PUZZLE_B_POINT_3, PUZZLE_B_POINT_4]
+
+# Trajectory sequence for Puzzle C
+TRAJECTORY_POINTS_PUZZLE_C = [PUZZLE_C_POINT_1, PUZZLE_C_POINT_2, PUZZLE_C_POINT_3, PUZZLE_C_POINT_4]
+
+# Trajectory sequence for Puzzle D
+TRAJECTORY_POINTS_PUZZLE_D = [PUZZLE_D_POINT_1, PUZZLE_D_POINT_2, PUZZLE_D_POINT_3, PUZZLE_D_POINT_4]
+
+# Trajectory sequence for Puzzle E
+TRAJECTORY_POINTS_PUZZLE_E = [PUZZLE_E_POINT_1, PUZZLE_E_POINT_2, PUZZLE_E_POINT_3, PUZZLE_E_POINT_4]
+
 
 
 if __name__ == "__main__":
-    print_trajectory_info()
+    print_trajectory_info(TRAJECTORY_POINTS_PUZZLE_A, "Puzzle A")
+    print("\n")
+    print_trajectory_info(TRAJECTORY_POINTS_PUZZLE_B, "Puzzle B")
+    print("\n")
+    print_trajectory_info(TRAJECTORY_POINTS_PUZZLE_C, "Puzzle C")
+    print("\n")
+    print_trajectory_info(TRAJECTORY_POINTS_PUZZLE_D, "Puzzle D")
+    print("\n")
+    print_trajectory_info(TRAJECTORY_POINTS_PUZZLE_E, "Puzzle E")
