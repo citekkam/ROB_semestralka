@@ -16,7 +16,6 @@ from se3 import SE3
 from so3 import SO3
 
 
-
 def interpolate_position_linear(p1, p2, t):
     """
     Linear interpolation between two positions.
@@ -36,7 +35,6 @@ def interpolate_position_linear(p1, p2, t):
         Interpolated position (3D numpy array)
     """
     return (1 - t) * p1 + t * p2
-
 
 def interpolate_rotation_slerp(rot1, rot2, t):
     """
@@ -72,7 +70,6 @@ def interpolate_rotation_slerp(rot1, rot2, t):
     
     return R_interp
 
-
 def interpolate_transformation(T1, T2, t):
     """
     Interpolate between two SE3 transformations.
@@ -95,7 +92,6 @@ def interpolate_transformation(T1, T2, t):
     
     # Create interpolated SE3 transformation
     return SE3(translation=p_interp, rotation=R_interp)
-
 
 def generate_trajectory_segment(T_start, T_end, num_points=50):
     """
@@ -144,7 +140,6 @@ def generate_traj_count(trajectory_points, num_points_per_segment=50):
         full_trajectory.extend(segment)
     
     return full_trajectory
-
 
 def generate_traj_len(trajectory_points, segment_length=0.01):
     """
