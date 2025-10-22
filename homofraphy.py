@@ -32,7 +32,7 @@ def hom2se3(T : ArrayLike) -> SE3:
 DARK_TRESH = 120
 # SE3 from gripper to center of circle
 CRC_OFF = hom2se3(np.array([
-    [1, 0, 0, 1.35],
+    [1, 0, 0, 0.135],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
     [0, 0, 0, 1]

@@ -36,17 +36,19 @@ print(puzzle_base)
 
 # T = T[0,3] += puzzle_base[0]
 
-T = [
-  [-9.99999517e-01, 4.36878670e-04, -8.80522963e-04, -9.49624281e-01],
-  [4.36546069e-04, 9.99999833e-01, 3.77887523e-04, -2.82086128e-03],
+T = np.array([
+  [-9.99999517e-01, 4.36878670e-04, -8.80522963e-04, 0.26545822],
+  [4.36546069e-04, 9.99999833e-01, 3.77887523e-04, -0.00275656],
   [8.80687907e-04, 3.77502951e-04, -9.99999541e-01, 2.30000000e-01],
   [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
-]
+])
 
 ik_sol = robot.ik(T)
 T_go = find_shortest_path(robot.get_q(),ik_sol)
-print(ik_sol)
-ik = ik_sol[T_go[0]]
-robot.move_to_position(ik)
+idx, dis, _ = T_go[0]
+print(idx)
+ik = ik_sol[idx]
+print(ik)
+robot.move_to_q(ik)
 
 # robot.release()
