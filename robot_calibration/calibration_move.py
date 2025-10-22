@@ -201,6 +201,7 @@ def main():
         # Define robot parameters - CRS93
         robot = CRS93()
         robot.initialize(home=False)
+        robot.soft_home()
 
         print("✅ Robot initialized successfully")
         print()
