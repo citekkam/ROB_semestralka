@@ -154,6 +154,123 @@ def move_to_position(robot, target_pose: np.ndarray, joint_weights: np.ndarray =
                 
     return True
 
+def robot_calibration(soft_home=True) -> list:
+    """
+    Robot calibration function that collects images and transformation matrices.
+    
+    Returns:
+        list: List of [image, transformation_matrix] pairs for each calibration position.
+              Returns empty list if calibration fails.
+    """
+    print("="*70)
+    print("  ROBOT CALIBRATION")
+    print("="*70)
+    print()
+    
+    # Setup paths
+    script_dir = Path(__file__).parent
+    positions_file = script_dir / "robot_calibration" / "calibration_positions.yaml"
+    
+    # Configuration
+    joint_weights = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+    
+    # Load calibration positions
+    print(f"📂 Loading calibration positions from: {positions_file}")
+    try:
+        positions = load_calibration_positions(str(positions_file))
+        print(f"✅ Loaded {len(positions)} calibration positions")
+        print()
+    except Exception as e:
+        print(f"❌ Failed to load positions: {e}")
+        return []
+    
+    # Initialize robot
+    print("🤖 Initializing robot...")
+    try:
+        robot = CRS93()
+        if soft_home:
+            robot.initialize(home=False)
+            robot.soft_home()
+        else:
+            robot.initialize()
+        print("✅ Robot initialized successfully")
+        print()
+    except Exception as e:
+        print(f"❌ Failed to initialize robot: {e}")
+        return []
+    
+    # Array to store [image, transformation_matrix] pairs
+    calibration_data = []
+    
+    # Process each calibration position
+    successful_captures = 0
+    failed_captures = 0
+    
+    for i, (pos_name, target_pose) in enumerate(positions, 1):
+        print(f"{'='*70}")
+        print(f"Position {i}/{len(positions)}: {pos_name}")
+        print(f"{'='*70}")
+        
+        # Move to position
+        print(f"Moving to position...")
+        if not move_to_position(robot, target_pose, joint_weights):
+            print(f"❌ Failed to move to position {pos_name}")
+            failed_captures += 1
+            continue
+        
+        # Get actual robot position after movement
+        actual_q = robot.get_q()
+        print(f"Actual joint configuration: {actual_q}")
+        
+        # Calculate transformation matrix
+        transformation_matrix = robot.fk(actual_q)
+        print(f"Transformation matrix calculated")
+        
+        # Capture image
+        print(f"📸 Capturing image...")
+        try:
+            image = robot.grab_image()
+            if image is None:
+                print(f"❌ Failed to capture image at position {pos_name}")
+                failed_captures += 1
+                continue
+            print(f"✅ Image captured: {image.shape}")
+        except Exception as e:
+            print(f"❌ Error capturing image: {e}")
+            failed_captures += 1
+            continue
+        
+        # Append [image, transformation_matrix] to calibration_data
+        calibration_data.append([image, transformation_matrix])
+        print(f"✅ Data added to calibration array (entry {len(calibration_data)})")
+        successful_captures += 1
+        print()
+    
+    # Summary
+    print("="*70)
+    print("  CALIBRATION SUMMARY")
+    print("="*70)
+    print(f"Total positions: {len(positions)}")
+    print(f"✅ Successful captures: {successful_captures}")
+    print(f"❌ Failed captures: {failed_captures}")
+    print(f"📊 Calibration data entries: {len(calibration_data)}")
+    print()
+    
+    # # Release robot
+    # print("🤖 Releasing robot...")
+    # try:
+    #     robot.release()
+    #     print("✅ Robot released successfully")
+    # except Exception as e:
+    #     print(f"⚠️  Warning during robot release: {e}")
+    
+    print()
+    print("="*70)
+    print("  CALIBRATION COMPLETE")
+    print("="*70)
+    
+    return calibration_data
+
 def main():
     """Main calibration automation function."""
     
