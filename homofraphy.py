@@ -237,10 +237,45 @@ def get_puzzle_orientation():
 
 def get_base_T(base_pos: np.ndarray, orientation: SO3) -> np.ndarray:
     # CRC_OFF * trans
-    print(orientation, np.array([base_pos[0], base_pos[1], 0.05]))
+    print(orientation, np.array([base_pos[0], base_pos[1], 0.15]))
     T = SE3(rotation = orientation, translation = np.array([base_pos[0], base_pos[1], 0.05]))
     print("base_T: ", T)
     return T
+
+
+def homography_check(img: ArrayLike, H: np.ndarray) -> np.ndarray: 
+    centers = []
+    img_gray_aruco = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    img_gray = cv2.medianBlur(img_gray_aruco, 5)
+    rows = img_gray.shape[0]
+
+    img_gray = ((img_gray < DARK_TRESH) * 255).astype(np.uint8)
+
+    # print(img_gray)
+    # cv2.imshow("gray", img_gray)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+
+
+    circles = cv2.HoughCircles(img_gray, cv2.HOUGH_GRADIENT, 1, rows / 8,
+                        param1=120, param2=33,
+                        minRadius=20, maxRadius=300)
+
+
+    if circles is not None and len(circles[0, :]) == 1:
+        circles = np.uint16(np.around(circles))
+        for j in circles[0, :]:
+            center = (j[0], j[1])
+            # circle center
+            cv2.circle(img, center, 1, (0, 100, 100), 3)
+            # circle outline
+            radius = j[2]
+            cv2.circle(img, center, radius, (255, 0, 255), 3)
+            centers.append(center)
+
+    return H @ np.array([centers[0][0], centers[0][1], 1])
 
 if __name__ == "__main__":
     print(CRC_OFF)

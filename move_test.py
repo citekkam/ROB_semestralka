@@ -3,9 +3,11 @@ from ctu_crs import CRS93
 from select_shortest_path import find_shortest_path
 import cv2
 # from ROB_semestralka.camera.dataset_creator import next_filename, uloz_data
-from homofraphy import hom2se3, load_image_yaml_pairs, correct_eff_pos, find_hoop_homography, find_aruco, get_aruco_world_pos, get_puzzle_base, CRC_OFF
+from homofraphy import hom2se3, load_image_yaml_pairs, find_hoop_homography
+from homofraphy import find_aruco, get_aruco_world_pos, get_puzzle_base, CRC_OFF, get_base_T, homography_check
 from robot_calibration.calibration_move import move_to_pos_T, robot_calibration
 
+from so3 import SO3
 robot = CRS93()
 robot.initialize(home = False)
 robot.soft_home()
@@ -44,7 +46,6 @@ T = np.array([
   [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
 ])
 
-print("T_new", T @ CRC_OFF.inverse().homogeneous())
 # T[0,3] = puzzle_base[0]
 # T[1,3] = puzzle_base[1]
 # T[2,3] = 0.3
@@ -52,7 +53,21 @@ print("T_new", T @ CRC_OFF.inverse().homogeneous())
 # print(T)
 
 # T = T[0,3] += puzzle_base[0]
-T_new = T @ CRC_OFF.inverse().homogeneous()
+
+## This should get the robot above the puzzle center ---------
+T_new = get_base_T(puzzle_base, SO3(np.array([
+        [-1, 0, 0],
+        [0, 1, 0],
+        [0, 0, -1]
+    ])))
+
+print("T_new", T_new)
+
+print("Checking homogrpahy, should differ by 0.135 in x axis")
+H_checked = homography_check(img, H)
+print("Forward kinematics:", robot.fk(robot.get_q()))
+print("Computed homography:", H_checked)
+
 T = np.array([
   [-9.99999517e-01, 4.36878670e-04, -8.80522963e-04, 5.09745326e-01],
   [4.36546069e-04, 9.99999833e-01, 3.77887523e-04, -1.29327484e-06 ],
