@@ -1,99 +1,68 @@
-# calibrate_charuco_noglob.py
-import cv2, numpy as np, yaml
-from pathlib import Path
+#!/usr/bin/env python3
+import os, cv2, numpy as np
 
-# === Settings (must match your printed board) ===
-DICT = cv2.aruco.DICT_4X4_50
-SQUARES_X, SQUARES_Y = 5, 5
-SQUARE_LEN = 0.025   # meters (25 mm)
-MARKER_LEN = 0.018   # meters (18 mm)
+IMG_PATH = "/home/kamil/PycharmProjects/ROB_semestralka/exporty/data_1.png"
 
-IMG_DIR = Path(__file__).parent / "ArUco_codes"  # folder with your calibration images
-EXTS = {".png", ".jpg", ".jpeg"}       # accepted extensions
+# --- load & gray ---
+if not os.path.exists(IMG_PATH): raise FileNotFoundError(IMG_PATH)
+img = cv2.imread(IMG_PATH, cv2.IMREAD_COLOR)
+if img is None: raise IOError("Cannot read image.")
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# --- Build file list without glob ---
-files = sorted([p for p in IMG_DIR.iterdir() if p.is_file() and p.suffix.lower() in EXTS],
-               key=lambda p: p.name)
-if not files:
-    raise SystemExit(f"No images found in {IMG_DIR} with extensions {sorted(EXTS)}")
+# --- detect ArUco 4x4_50 ---
+dic = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+params = cv2.aruco.DetectorParameters()
+if hasattr(cv2.aruco, "ArucoDetector"):
+    det = cv2.aruco.ArucoDetector(dic, params)
+    corners, ids, _ = det.detectMarkers(gray)
+else:
+    corners, ids, _ = cv2.aruco.detectMarkers(gray, dic, parameters=params)
 
-# --- ArUco / ChArUco setup ---
-aruco_dict = cv2.aruco.getPredefinedDictionary(DICT)
-board = cv2.aruco.CharucoBoard((SQUARES_X, SQUARES_Y), SQUARE_LEN, MARKER_LEN, aruco_dict)
-detector = cv2.aruco.ArucoDetector(aruco_dict, cv2.aruco.DetectorParameters())
+if ids is None or len(ids) < 2:
+    raise SystemExit("Need at least 2 ArUco markers.")
 
-all_corners, all_ids = [], []
-img_size = None
-SHOW_IMAGES = True  # Set to False to skip visualization
+# --- pick two (smallest IDs) & origin ---
+ids_flat = ids.flatten()
+centers = [c[0].mean(axis=0) for c in corners]
+order = np.argsort(ids_flat)[:2]
+pair_ids = ids_flat[order]
+pair_centers = [centers[i] for i in order]
+origin = (pair_centers[0] + pair_centers[1]) / 2.0
 
-for path in files:
-    img = cv2.imread(str(path))
-    if img is None:
-        print(f"Warning: could not read {path}, skipping.")
-        continue
+# --- reference marker for axis orientation (use first of the pair) ---
+ref_idx = np.where(ids_flat == pair_ids[0])[0][0]
+rc = corners[ref_idx][0].astype(np.float32)   # (4,2)
+p0, p1, p3 = rc[0], rc[1], rc[3]
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    corners, ids, _ = detector.detectMarkers(gray)
-    if ids is None:
-        continue
+# raw axis vectors (along edges)
+vx_raw = (p1 - p0)
+vy_raw = (p3 - p0)
 
-    n, ch_corners, ch_ids = cv2.aruco.interpolateCornersCharuco(corners, ids, gray, board)
-    if n is not None and n >= 10:
-        all_corners.append(ch_corners)
-        all_ids.append(ch_ids)
-        img_size = gray.shape[::-1]
-        
-        # Draw detected corners on the image
-        if SHOW_IMAGES:
-            img_display = img.copy()
-            cv2.aruco.drawDetectedMarkers(img_display, corners, ids)
-            cv2.aruco.drawDetectedCornersCharuco(img_display, ch_corners, ch_ids)
-            
-            # Resize for better viewing if image is too large
-            h, w = img_display.shape[:2]
-            if w > 1280:
-                scale = 1280 / w
-                img_display = cv2.resize(img_display, (int(w*scale), int(h*scale)))
-            
-            cv2.imshow(f'ChArUco Detection - {path.name} ({n} corners)', img_display)
-            print(f"Processed {path.name}: {n} ChArUco corners detected")
-            key = cv2.waitKey(500)  # Wait 500ms between images (or press any key to continue)
-            if key == 27:  # ESC to skip remaining images
-                cv2.destroyAllWindows()
-                break
+# normalize
+vx = vx_raw / (np.linalg.norm(vx_raw) + 1e-12)
+vy = vy_raw / (np.linalg.norm(vy_raw) + 1e-12)
 
-# --- Check we collected data ---
-if not all_corners:
-    raise SystemExit("No ChArUco corners—check images, board size, and lighting.")
+# print normalized vectors (+ sanity lengths)
+print("Normalized axis vectors (image coords):")
+print(f"+X = [{vx[0]:.6f}, {vx[1]:.6f}]  | |+X| = {np.linalg.norm(vx):.6f}")
+print(f"+Y = [{vy[0]:.6f}, {vy[1]:.6f}]  | |+Y| = {np.linalg.norm(vy):.6f}")
 
-print(f"\n{'='*60}")
-print(f"Celkem použito {len(all_corners)} obrázků pro kalibraci")
-print(f"Celkem nalezeno {len(files)} obrázků ve složce")
-print(f"{'='*60}\n")
+# --- draw axes (same as before) ---
+edge01 = np.linalg.norm(rc[1] - rc[0]); edge03 = np.linalg.norm(rc[3] - rc[0])
+L = 0.5 * 0.9 * (edge01 + edge03) * 0.5
 
-# --- Calibrate ---
-rms, K, D, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(
-    charucoCorners=all_corners,
-    charucoIds=all_ids,
-    board=board,
-    imageSize=img_size,
-    cameraMatrix=None,
-    distCoeffs=None
-)
+out = img.copy()
+cv2.aruco.drawDetectedMarkers(out, corners, ids)
+O  = origin.astype(int)
+Xp = (origin + vx * L).astype(int)
+Yp = (origin + vy * L).astype(int)
+cv2.circle(out, O, 6, (255,255,255), -1)
+cv2.arrowedLine(out, O, Xp, (0,0,255), 3, tipLength=0.15)
+cv2.arrowedLine(out, O, Yp, (0,255,0), 3, tipLength=0.15)
+cv2.putText(out, "+X", tuple(Xp), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2, cv2.LINE_AA)
+cv2.putText(out, "+Y", tuple(Yp), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2, cv2.LINE_AA)
 
-print("RMS reprojection error:", rms)
-print("K:\n", K)
-print("D:\n", D.ravel())
 
-# --- Save calibration to YAML ---
-data = {
-    "camera_matrix": {"rows": 3, "cols": 3, "dt": "d", "data": K.flatten().tolist()},
-    "dist_coeffs":   {"rows": 1, "cols": len(D), "dt": "d", "data": D.flatten().tolist()},
-}
-calib_path = Path(__file__).parent / "calib.yaml"
-with open(calib_path, "w") as f:
-    yaml.dump(data, f)
-print(f"Wrote {calib_path}")
-
-# Close any remaining windows
-cv2.destroyAllWindows()
+# --- save ---
+cv2.imwrite("output_axes_aligned.jpg", out)
+print("Uloženo: output_axes_aligned.jpg")
