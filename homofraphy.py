@@ -118,16 +118,7 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     assert images.shape[0] == len(hoop_positions)
     centers = []
 
-    hoop_vectors = []
-    for pos in hoop_positions:
-        trans = hom2se3(np.array(pos["transformacni_matic"]))
-        trans = trans * CRC_OFF.inverse()
-        hoop_vectors.append(trans.translation[:2])
-    hoop_vectors = np.array(hoop_vectors, dtype=np.float32) 
-
-    
-    for i in range(len(images)):
-        img = images[i]
+    for img in images:
         # todo HW03: Detect circle in each image
         img_gray_aruco = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
