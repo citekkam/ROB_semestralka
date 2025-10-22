@@ -154,13 +154,63 @@ def move_to_position(robot, target_pose: np.ndarray, joint_weights: np.ndarray =
                 
     return True
 
-def robot_calibration(soft_home=True) -> list:
+def move_to_pos_T(robot, target_pose_T: np.ndarray, joint_weights: np.ndarray = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])) -> bool:
+    """
+    Safely move robot to target position using IK and shortest path selection.
+    
+    Args:
+        robot: Robot instance (CRS93)
+        target_pose: Target pose [x, y, z, roll, pitch, yaw]
+        joint_weights: Weights for distance calculation
+    
+    Returns:
+        bool: True if movement successful, False otherwise
+    """
+    # Get current robot position
+    current_q = robot.get_q()
+    
+    # Convert pose to transformation matrix
+    target_T = target_pose_T
+
+    print(target_T)
+    
+    # Get all IK solutions
+    ik_solutions = robot.ik(target_T)
+    
+    if len(ik_solutions) == 0:
+        print(f"  ⚠️  No IK solutions found for target pose")
+        return False
+    
+    print(f"  Found {len(ik_solutions)} IK solutions")
+    
+    # Find shortest path
+    sorted_distances = find_shortest_path(current_q, ik_solutions, joint_weights)
+
+    for idx,distance, _ in sorted_distances:
+        q = ik_solutions[idx]
+        # check robot limit
+        if robot.in_limits(q):
+            # Move to position
+            print("q is:", q)
+            robot.move_to_q(q)
+            print("start moving")
+            robot.wait_for_motion_stop()
+            print("stop moving")
+            break
+        else:
+            print("robot limit are false ty debile!!!!!!!!!!!!", idx)
+                
+    return True
+
+def robot_calibration(soft_home=True) -> tuple:
     """
     Robot calibration function that collects images and transformation matrices.
     
     Returns:
-        list: List of [image, transformation_matrix] pairs for each calibration position.
-              Returns empty list if calibration fails.
+        tuple: (imgs, transformation_matrixes) where:
+               - imgs: list of images captured at each calibration position
+               - transformation_matrixes: list of 4x4 transformation matrices
+               Returns ([], []) if calibration fails.
     """
     print("="*70)
     print("  ROBOT CALIBRATION")
@@ -182,7 +232,7 @@ def robot_calibration(soft_home=True) -> list:
         print()
     except Exception as e:
         print(f"❌ Failed to load positions: {e}")
-        return []
+        return [], []
     
     # Initialize robot
     print("🤖 Initializing robot...")
@@ -197,10 +247,11 @@ def robot_calibration(soft_home=True) -> list:
         print()
     except Exception as e:
         print(f"❌ Failed to initialize robot: {e}")
-        return []
+        return [], []
     
-    # Array to store [image, transformation_matrix] pairs
-    calibration_data = []
+    # Arrays to store images and transformation matrices separately
+    imgs = []
+    transformation_matrixes = []
     
     # Process each calibration position
     successful_captures = 0
@@ -240,9 +291,10 @@ def robot_calibration(soft_home=True) -> list:
             failed_captures += 1
             continue
         
-        # Append [image, transformation_matrix] to calibration_data
-        calibration_data.append([image, transformation_matrix])
-        print(f"✅ Data added to calibration array (entry {len(calibration_data)})")
+        # Append image and transformation_matrix to separate arrays
+        imgs.append(image)
+        transformation_matrixes.append(transformation_matrix)
+        print(f"✅ Data added to calibration arrays (entry {len(imgs)})")
         successful_captures += 1
         print()
     
@@ -253,7 +305,8 @@ def robot_calibration(soft_home=True) -> list:
     print(f"Total positions: {len(positions)}")
     print(f"✅ Successful captures: {successful_captures}")
     print(f"❌ Failed captures: {failed_captures}")
-    print(f"📊 Calibration data entries: {len(calibration_data)}")
+    print(f"📊 Images collected: {len(imgs)}")
+    print(f"📊 Transformation matrices collected: {len(transformation_matrixes)}")
     print()
     
     # # Release robot
@@ -269,7 +322,7 @@ def robot_calibration(soft_home=True) -> list:
     print("  CALIBRATION COMPLETE")
     print("="*70)
     
-    return calibration_data
+    return (imgs, transformation_matrixes)
 
 def main():
     """Main calibration automation function."""

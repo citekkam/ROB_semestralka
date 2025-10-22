@@ -176,7 +176,6 @@ def generate_traj_len(trajectory_points, segment_length=0.01):
     
     return full_trajectory
 
-
 if __name__ == "__main__":
     # Example usage
     from trajectory_points import TRAJECTORY_POINTS_PUZZLE_B
