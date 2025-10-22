@@ -2,49 +2,51 @@ import numpy as np
 from ctu_crs import CRS93
 from select_shortest_path import find_shortest_path
 # from ROB_semestralka.camera.dataset_creator import next_filename, uloz_data
+from homofraphy import hom2se3, load_image_yaml_pairs, correct_eff_pos, find_hoop_homography, find_aruco, get_aruco_world_pos, get_puzzle_base, CRC_OFF
 
 robot = CRS93()
-robot.initialize()
+robot.initialize(home = False)
+robot.soft_home()
 
-joint_weights = np.array([1.0, 1.0, 1.0, 10.0, 1.0, 10.0])
+FILE = "/home/nguyexu7/Documents/ROB/ROB_semestralka/robot_calibration/calibration_data"
 
+print(CRC_OFF)
+imgs, hoop_pos = load_image_yaml_pairs()
 
+# print(imgs, hoop_pos)
+H = find_hoop_homography(imgs, hoop_pos)
+print(H)
 
-# q0 = np.array([ 0.58205858, -1.09545765, -1.75684144, -0.01269079, -0.28491104,  0.59186361])
-# robot.move_to_q(q0)
+img = robot.grab_image()
 
+ids, corners = find_aruco(img)
+positions = get_aruco_world_pos(corners, H)
 
+puzzle_base = get_puzzle_base(ids, positions)
+print(puzzle_base)
 
-robot_q = robot.get_q()
-# # print(robot_q)
+# T = robot.fk(robot.get_q())
+# print(T)
 
-pose = robot.fk(robot.get_q())
-# print(pose)
-# pose[0][3] += 0.0
-# pose[1][3] += 0.0
-pose[2][3] += 0.1
-# print(pose)
-robot_qs = robot.ik(pose)
-# print(robot_qs)
-sorted_distances = find_shortest_path(robot_q, robot_qs, joint_weights)
+# T[0,3] = puzzle_base[0]
+# T[1,3] = puzzle_base[1]
+# T[2,3] = 0.3
 
+# print(T)
 
-# idx,_,_ = sorted_distances[0]
-# print(idx)
-print(robot_qs[idx])
+# T = T[0,3] += puzzle_base[0]
 
-# robot.move_to_q(robot_qs[idx])
-robot.wait_for_motion_stop()
+T = [
+  [-9.99999517e-01, 4.36878670e-04, -8.80522963e-04, -9.49624281e-01],
+  [4.36546069e-04, 9.99999833e-01, 3.77887523e-04, -2.82086128e-03],
+  [8.80687907e-04, 3.77502951e-04, -9.99999541e-01, 2.30000000e-01],
+  [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
+]
 
-# robot_q = robot.get_q()
-# print("Robot_pos_q: ",robot_q)
-
-# pose = robot.fk(robot.get_q())
-# print("tramsformacni matic:", pose)
-
-# uloz_data(robot_q, pose, robot.grab_image())
-
-
-
+ik_sol = robot.ik(T)
+T_go = find_shortest_path(robot.get_q(),ik_sol)
+print(ik_sol)
+ik = ik_sol[T_go[0]]
+robot.move_to_position(ik)
 
 # robot.release()

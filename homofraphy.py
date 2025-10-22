@@ -38,14 +38,11 @@ CRC_OFF = hom2se3(np.array([
     [0, 0, 0, 1]
 ]))
 
-def load_image_yaml_pairs(folder: str = "/home/muflonn/fel/semestr5/rob/semesralka/exporty") -> Tuple[List[ArrayLike], List[dict]]:
+def load_image_yaml_pairs(folder: str = "/home/nguyexu7/Documents/ROB/ROB_semestralka/robot_calibration/calibration_data") -> Tuple[List[ArrayLike], List[dict]]:
     """
     Load corresponding PNG images and YAML files from a folder.
 
-    Expects pairs like:
-        data_1.png, data_1.yaml
-        data_2.png, data_2.yaml
-        ...
+    Expects pairs like:images: ArrayLike, hoop_positions: List[dict]
 
     Args:
         folder: Path to the folder containing .png and .yaml files.
