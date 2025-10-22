@@ -36,7 +36,15 @@ print(CRC_OFF.inverse().act(np.hstack((puzzle_base[:2], 0.0))))
 T = robot.fk(robot.get_q())
 print("fk",T)
 print(CRC_OFF.inverse())
-print(CRC_OFF.inverse().homogeneous() @ T)
+
+T = np.array([
+  [-9.99999517e-01, 4.36878670e-04, -8.80522963e-04, 0.5],
+  [4.36546069e-04, 9.99999833e-01, 3.77887523e-04, 0 ],
+  [8.80687907e-04, 3.77502951e-04, -9.99999541e-01, 2.5000000e-01],
+  [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
+])
+
+print("T_new", T @ CRC_OFF.inverse().homogeneous())
 # T[0,3] = puzzle_base[0]
 # T[1,3] = puzzle_base[1]
 # T[2,3] = 0.3
@@ -44,16 +52,17 @@ print(CRC_OFF.inverse().homogeneous() @ T)
 # print(T)
 
 # T = T[0,3] += puzzle_base[0]
-
+T_new = T @ CRC_OFF.inverse().homogeneous()
 T = np.array([
-  [-9.99999517e-01, 4.36878670e-04, -8.80522963e-04, 0.537],
-  [4.36546069e-04, 9.99999833e-01, 3.77887523e-04, -0.0146],
+  [-9.99999517e-01, 4.36878670e-04, -8.80522963e-04, 5.09745326e-01],
+  [4.36546069e-04, 9.99999833e-01, 3.77887523e-04, -1.29327484e-06 ],
   [8.80687907e-04, 3.77502951e-04, -9.99999541e-01, 3.0000000e-01],
   [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
 ])
 
 
-move_to_pos_T(robot, T) 
+
+move_to_pos_T(robot, T_new) 
 img = robot.grab_image()
 
 cv2.imshow("img", img)
