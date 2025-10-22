@@ -18,14 +18,15 @@ def next_filename(folder="exporty", prefix="data", ext=".yaml"):
 
 # --- 2️⃣ Formátování matice do textu ---
 def format_array(arr):
-    """Vrátí pole jako hezky zformátovaný text podobný numpy výstupu."""
+    """Vrátí pole jako hezky zformátovaný text s čárkami, podobný numpy výstupu."""
     if arr.ndim == 1:
-        return "[" + " ".join(f"{x: .8e}" for x in arr) + "]"
+        return "[" + ", ".join(f"{x:.8e}" for x in arr) + "]"
     elif arr.ndim == 2:
-        rows = ["[" + " ".join(f"{x: .8e}" for x in row) + "]" for row in arr]
-        return "[\n " + "\n ".join(rows) + "\n]"
+        rows = ["[" + ", ".join(f"{x:.8e}" for x in row) + "]" for row in arr]
+        return "[\n  " + ",\n  ".join(rows) + "\n]"
     else:
-        return str(arr)
+        # Pro vyšší dimenze aspoň zajistíme čárky pomocí numpy formátovače
+        return np.array2string(arr, separator=", ")
 
 
 # --- 3️⃣ Hlavní funkce pro uložení ---
