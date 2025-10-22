@@ -32,7 +32,7 @@ def hom2se3(T : ArrayLike) -> SE3:
 DARK_TRESH = 120
 # SE3 from gripper to center of circle
 CRC_OFF = hom2se3(np.array([
-    [1, 0, 0, 1.35],
+    [1, 0, 0, 0.135],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
     [0, 0, 0, 1]
@@ -104,17 +104,6 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     """
     Find homography based on images containing the hoop and the hoop positions loaded from
     the hoop_positions.json file in the following format:
-
-    [{
-        "RPY": [-0.0005572332585040621, -3.141058227474627, 0.0005185830258253442],
-        "translation_vector": [0.5093259019899434, -0.17564068853313258, 0.04918733225140541]
-    },
-    {
-        "RPY": [-0.0005572332585040621, -3.141058227474627, 0.0005185830258253442],
-        "translation_vector": [0.5093569397977782, -0.08814069881074972, 0.04918733225140541]
-    },
-    ...
-    ]
     """
 
     images = np.asarray(images)
@@ -124,8 +113,10 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     hoop_vectors = []
     for pos in hoop_positions:
         trans = hom2se3(np.array(pos["transformacni_matic"]))
-        trans = trans * CRC_OFF
+        trans =  trans * CRC_OFF.inverse()
+        print(trans)
         hoop_vectors.append(trans.translation[:2])
+        print(trans.translation[:2])
     hoop_vectors = np.array(hoop_vectors, dtype=np.float32) 
 
 
@@ -153,12 +144,12 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
 
         if circles is not None and len(circles[0, :]) == 1:
             circles = np.uint16(np.around(circles))
-            for i in circles[0, :]:
-                center = (i[0], i[1])
+            for j in circles[0, :]:
+                center = (j[0], j[1])
                 # circle center
                 cv2.circle(img, center, 1, (0, 100, 100), 3)
                 # circle outline
-                radius = i[2]
+                radius = j[2]
                 cv2.circle(img, center, radius, (255, 0, 255), 3)
                 centers.append(center)
         else:
@@ -217,8 +208,10 @@ def get_aruco_world_pos(corners : ArrayLike, H : np.ndarray) -> List[np.ndarray]
     for c in corners:
         c = c[0]
         center = np.array([(c[0][0] + c[2][0]) / 2, (c[0][1] + c[2][1]) / 2, 1])
+        print(center)
         world_pos = H @ center
         #TODO check how it works
+        print(world_pos)
         world_pos = world_pos / world_pos[2]
         positions.append(world_pos)
 
@@ -237,10 +230,9 @@ def get_puzzle_base(aruco_ids: List[int], aruco_positions: List[np.ndarray]):
         center = (pos1 + pos2) / 2.0
     else:
         raise NotImplementedError("False positives detected, more than two ArUco markers found.")
-
     return center
 
-def get_puzzle_orientation():
+def get_puzzle_orientation():   
     pass
 
 if __name__ == "__main__":
