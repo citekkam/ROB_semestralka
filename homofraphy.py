@@ -121,11 +121,11 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     hoop_vectors = []
     for pos in hoop_positions:
         trans = hom2se3(np.array(pos["transformacni_matic"]))
-        trans = trans * CRC_OFF
+        trans = trans * CRC_OFF.inverse()
         hoop_vectors.append(trans.translation[:2])
     hoop_vectors = np.array(hoop_vectors, dtype=np.float32) 
 
-
+    
     for i in range(len(images)):
         img = images[i]
         # todo HW03: Detect circle in each image
@@ -150,12 +150,12 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
 
         if circles is not None and len(circles[0, :]) == 1:
             circles = np.uint16(np.around(circles))
-            for i in circles[0, :]:
-                center = (i[0], i[1])
+            for j in circles[0, :]:
+                center = (j[0], j[1])
                 # circle center
                 cv2.circle(img, center, 1, (0, 100, 100), 3)
                 # circle outline
-                radius = i[2]
+                radius = j[2]
                 cv2.circle(img, center, radius, (255, 0, 255), 3)
                 centers.append(center)
         else:
