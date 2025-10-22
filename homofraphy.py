@@ -32,7 +32,7 @@ def hom2se3(T : ArrayLike) -> SE3:
 DARK_TRESH = 120
 # SE3 from gripper to center of circle
 CRC_OFF = hom2se3(np.array([
-    [1, 0, 0, 0.135],
+    [1, 0, 0, -0.135],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
     [0, 0, 0, 1]
@@ -113,7 +113,8 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     hoop_vectors = []
     for pos in hoop_positions:
         trans = hom2se3(np.array(pos["transformacni_matic"]))
-        trans =  trans * CRC_OFF.inverse()
+        print(trans)
+        trans = trans * CRC_OFF
         print(trans)
         hoop_vectors.append(trans.translation[:2])
         print(trans.translation[:2])
@@ -171,7 +172,7 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
 
     centers = np.array(centers, dtype=np.float32)
     print(centers)
-    print(hoop_vectors)
+    print(* hoop_vectors)
 
     print(len(centers))
     print(len(hoop_vectors))
@@ -191,15 +192,11 @@ def find_aruco(img):
 
     cv2.aruco.drawDetectedMarkers(img, corners, ids)
 
-    show_img = cv2.resize(img, (1200, 800))
-    cv2.imshow(f"ArUco", show_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
     return ids, corners
 
 
-def get_aruco_world_pos(corners : ArrayLike, H : np.ndarray) -> List[np.ndarray]:
+def get_aruco_world_pos(corners : ArrayLike, H : np.ndarray, img = None) -> List[np.ndarray]:
     """
     Get the world position of the aruco markers using the homography H.
     """
@@ -208,16 +205,21 @@ def get_aruco_world_pos(corners : ArrayLike, H : np.ndarray) -> List[np.ndarray]
     for c in corners:
         c = c[0]
         center = np.array([(c[0][0] + c[2][0]) / 2, (c[0][1] + c[2][1]) / 2, 1])
-        print(center)
+        if not img is None:
+            cv2.circle(img, (int(center[0]), int(center[1])), 5, (0, 255, 0), -1)
+        print("center",center)
         world_pos = H @ center
         #TODO check how it works
         print(world_pos)
         world_pos = world_pos / world_pos[2]
         positions.append(world_pos)
 
+
+
+
     return positions
 
-
+## TODO move to tranformations.py
 def get_puzzle_base(aruco_ids: List[int], aruco_positions: List[np.ndarray]):
     if aruco_ids is None:
         raise ValueError("At least two ArUco markers are required to determine the puzzle base.")
@@ -235,6 +237,14 @@ def get_puzzle_base(aruco_ids: List[int], aruco_positions: List[np.ndarray]):
 def get_puzzle_orientation():   
     pass
 
+
+def get_base_T(base_pos: np.ndarray, orientation: SO3) -> np.ndarray:
+    # CRC_OFF * trans
+    print(orientation, np.array([base_pos[0], base_pos[1], 0.05]))
+    T = SE3(rotation = orientation, translation = np.array([base_pos[0], base_pos[1], 0.05]))
+    print("base_T: ", T)
+    return T
+
 if __name__ == "__main__":
     print(CRC_OFF)
     imgs, hoop_pos = load_image_yaml_pairs()
@@ -242,12 +252,28 @@ if __name__ == "__main__":
     # print(imgs, hoop_pos)
     H = find_hoop_homography(imgs, hoop_pos)
     print(H)
+    img = imgs[0]
 
-    ids, corners = find_aruco(imgs[0])
+    ids, corners = find_aruco(img)
     print(ids, corners)
 
-    positions = get_aruco_world_pos(corners, H)
+
+    positions = get_aruco_world_pos(corners, H, img)
     print(positions)
 
     puzzle_base = get_puzzle_base(ids, positions)
     print(puzzle_base)
+
+    T = get_base_T(puzzle_base, SO3(np.array([
+        [-1, 0, 0],
+        [0, 1, 0],
+        [0, 0, -1]
+    ])))
+
+    trans = hom2se3(np.array(hoop_pos[2]["transformacni_matic"]))
+    print(trans)
+
+    show_img = cv2.resize(img, (1200, 800))
+    cv2.imshow(f"ArUco", show_img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()

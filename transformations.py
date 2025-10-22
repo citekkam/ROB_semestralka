@@ -28,8 +28,9 @@ def get_puzzle_orientation(aruco_ids: ArrayLike, aruco_positions: ArrayLike) -> 
     pass
 
 
-def hoop_offset(base_pos: np.ndarray, orientation: SO3) -> np.ndarray:
+def get_base_T(base_pos: np.ndarray, orientation: SO3) -> np.ndarray:
     # CRC_OFF * trans
-    print(CRC_OFF.inverse().act(np.hstack((base_pos, 0.0))))
-    return CRC_OFF.inverse().act(np.hstack((base_pos, 0.0)))
+    T = SE3(orientation, np.array([base_pos[0], base_pos[1], 0.05]))
+    print(T)
+    return T
     
