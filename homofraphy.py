@@ -177,6 +177,93 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     H , _ = cv2.findHomography(centers, hoop_vectors)
     return H
 
+def detect_hoop_convex_hull(img) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+    """
+    Detekuje konvexní obal obručí a jeho střed.
+    
+    Returns:
+        Tuple[hull, center] nebo None pokud není detekován
+        - hull: konvexní obal jako numpy array
+        - center: střed jako [x, y] numpy array
+    """
+    # Převod do HSV
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    
+    # Vytvoření masky pro oranžovou barvu
+    mask = cv2.inRange(hsv, (36, 16, 0), (173, 255, 216))
+    
+    # Najít kontury
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    if not contours:
+        return None
+    
+    # Najít největší konturu
+    largest_contour = max(contours, key=cv2.contourArea)
+    
+    # Vytvořit konvexní obal
+    hull = cv2.convexHull(largest_contour)
+    
+    # Spočítat střed konvexního obalu (centroid nebo min enclosing circle)
+    M = cv2.moments(hull)
+    if M["m00"] != 0:
+        hull_cx = int(M["m10"] / M["m00"])
+        hull_cy = int(M["m01"] / M["m00"])
+    else:
+        (hull_cx_f, hull_cy_f), hull_r = cv2.minEnclosingCircle(hull)
+        hull_cx, hull_cy = int(hull_cx_f), int(hull_cy_f)
+    
+    center = np.array([hull_cx, hull_cy], dtype=np.float32)
+    
+    return hull, center
+
+
+def find_hoop_homography_2(images: ArrayLike, hoop_positions: List[dict]) -> np.ndarray:
+    """
+    Find homography based on images containing the hoop and the hoop positions loaded from
+    the hoop_positions.json file in the following format:
+
+    [{
+        "RPY": [-0.0005572332585040621, -3.141058227474627, 0.0005185830258253442],
+        "translation_vector": [0.5093259019899434, -0.17564068853313258, 0.04918733225140541]
+    },
+    {
+        "RPY": [-0.0005572332585040621, -3.141058227474627, 0.0005185830258253442],
+        "translation_vector": [0.5093569397977782, -0.08814069881074972, 0.04918733225140541]
+    },
+    ...
+    ]
+    """
+
+    images = np.asarray(images)
+    assert images.shape[0] == len(hoop_positions)
+
+    # todo HW03: Detect circle in each image
+    circle_centers = []
+    world_points = []
+    
+    for img, pos in zip(images, hoop_positions):
+        # Pro testování použijte detect_hoop_convex_hull místo detect_hoop_circle
+        result = detect_hoop_convex_hull(img)
+        
+        if result is not None:
+            hull, center = result
+            circle_centers.append(center)
+            trans = hom2se3(np.array(pos["transformacni_matic"]))
+            # Použít pouze x, y souřadnice z translation_vector
+            world_points.append(trans.translation[:2])
+            
+    
+    circle_centers = np.array(circle_centers, dtype=np.float32)
+    world_points = np.array(world_points, dtype=np.float32)
+
+    # print(f"Detected {len(circle_centers)} circles out of {len(images)} images.")
+    # todo HW03: Find homography using cv2.findHomography. Use the hoop positions and circle centers.
+    if len(circle_centers) >= 4:
+        H, _ = cv2.findHomography(circle_centers, world_points)
+        return H
+
+    return np.eye(3)
 
 def find_aruco(img):
     """

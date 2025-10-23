@@ -186,7 +186,7 @@ if __name__ == "__main__":
     
     # Generate trajectory with fixed spacing (1cm between points)
     print("\nGenerating trajectory with fixed spacing (segment_length=0.01m)...")
-    full_traj_len = generate_traj_len(TRAJECTORY_POINTS_PUZZLE_B, segment_length=0.02)
+    full_traj_len = generate_traj_len(TRAJECTORY_POINTS_PUZZLE_B, segment_length=0.01)
     print(f"Generated {len(full_traj_len)} points with length-based method")
     
     # Generate trajectory with fixed point count
