@@ -177,7 +177,7 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     H , _ = cv2.findHomography(centers, hoop_vectors)
     return H
 
-def detect_hoop_convex_hull(img) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+def detect_hoop_convex_hull(img):
     """
     Detekuje konvexní obal obručí a jeho střed.
     
