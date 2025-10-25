@@ -212,7 +212,7 @@ def get_aruco_world_pos(corners : ArrayLike, H : np.ndarray, img = None) -> List
         #TODO check how it works
         print(world_pos)
         world_pos = world_pos / world_pos[2]
-        positions.append(world_pos)
+        positions.append(center)
 
 
 
@@ -220,7 +220,7 @@ def get_aruco_world_pos(corners : ArrayLike, H : np.ndarray, img = None) -> List
     return positions
 
 ## TODO move to tranformations.py
-def get_puzzle_base(aruco_ids: List[int], aruco_positions: List[np.ndarray]):
+def get_puzzle_base(aruco_ids: List[int], aruco_positions: List[np.ndarray], img = None):
     if aruco_ids is None:
         raise ValueError("At least two ArUco markers are required to determine the puzzle base.")
     elif len(aruco_ids) == 1:
@@ -230,9 +230,12 @@ def get_puzzle_base(aruco_ids: List[int], aruco_positions: List[np.ndarray]):
         pos2 = aruco_positions[1]
 
         center = (pos1 + pos2) / 2.0
+        if not img is None:
+            cv2.circle(img, (int(center[0]), int(center[1])), 5, (0, 255, 0), -1)
+        res = H @ np.array([center[0], center[1], 1])
     else:
         raise NotImplementedError("False positives detected, more than two ArUco markers found.")
-    return center
+    return res / res[2]
 
 def get_puzzle_orientation():   
     pass
@@ -242,8 +245,42 @@ def get_base_T(base_pos: np.ndarray, orientation: SO3) -> np.ndarray:
     # CRC_OFF * trans
     print(orientation, np.array([base_pos[0], base_pos[1], 0.05]))
     T = SE3(rotation = orientation, translation = np.array([base_pos[0], base_pos[1], 0.05]))
-    print("base_T: ", T)
     return T
+
+def homography_check(img: ArrayLike, H: np.ndarray) -> np.ndarray: 
+    centers = []
+    img_gray_aruco = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    img_gray = cv2.medianBlur(img_gray_aruco, 5)
+    rows = img_gray.shape[0]
+
+    img_gray = ((img_gray < DARK_TRESH) * 255).astype(np.uint8)
+
+    # print(img_gray)
+    # cv2.imshow("gray", img_gray)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+
+
+    circles = cv2.HoughCircles(img_gray, cv2.HOUGH_GRADIENT, 1, rows / 8,
+                        param1=120, param2=33,
+                        minRadius=20, maxRadius=300)
+
+
+    if circles is not None and len(circles[0, :]) == 1:
+        circles = np.uint16(np.around(circles))
+        for j in circles[0, :]:
+            center = (j[0], j[1])
+            # circle center
+            cv2.circle(img, center, 1, (0, 100, 100), 3)
+            # circle outline
+            radius = j[2]
+            cv2.circle(img, center, radius, (255, 0, 255), 3)
+            centers.append(center)
+
+    world_pos = H @ np.array([centers[0][0], centers[0][1], 1])
+    return world_pos / world_pos[2]
 
 if __name__ == "__main__":
     print(CRC_OFF)
@@ -252,7 +289,7 @@ if __name__ == "__main__":
     # print(imgs, hoop_pos)
     H = find_hoop_homography(imgs, hoop_pos)
     print(H)
-    img = imgs[0]
+    img = imgs[4]
 
     ids, corners = find_aruco(img)
     print(ids, corners)
@@ -261,7 +298,7 @@ if __name__ == "__main__":
     positions = get_aruco_world_pos(corners, H, img)
     print(positions)
 
-    puzzle_base = get_puzzle_base(ids, positions)
+    puzzle_base = get_puzzle_base(ids, positions, img)
     print(puzzle_base)
 
     T = get_base_T(puzzle_base, SO3(np.array([
@@ -270,8 +307,11 @@ if __name__ == "__main__":
         [0, 0, -1]
     ])))
 
-    trans = hom2se3(np.array(hoop_pos[2]["transformacni_matic"]))
-    print(trans)
+    print("Position of puzzle base: ", T)
+    trans = hom2se3(np.array(hoop_pos[4]["transformacni_matic"]))
+    print("Forward kinematics: ",trans)
+    H_check = homography_check(img, H)
+    print("Homography check: ", H_check)
 
     show_img = cv2.resize(img, (1200, 800))
     cv2.imshow(f"ArUco", show_img)
