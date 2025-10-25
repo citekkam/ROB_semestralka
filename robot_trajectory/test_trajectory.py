@@ -12,17 +12,17 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from trajectory_points import TRAJECTORY_POINTS_PUZZLE_B
-from utils import visualize_trajectory, plot_trajectory_3d
+from ROB_semestralka.src.trajectory_points import TRAJECTORY_POINTS_PUZZLE_B
+from ROB_semestralka.src.utils import visualize_trajectory, plot_trajectory_3d
 from robot_trajectory.interpolation import generate_traj_len, generate_traj_count
-from robot_trajectory.utils import print_trajectory_info, visualize_trajectory, plot_trajectory_3d
+from ROB_semestralka.src.utils import print_trajectory_info, visualize_trajectory, plot_trajectory_3d
 
 
 
 if __name__ == "__main__":
     # Example usage
-    from trajectory_points import TRAJECTORY_POINTS_PUZZLE_B
-    from utils import visualize_trajectory, plot_trajectory_3d
+    from ROB_semestralka.src.trajectory_points import TRAJECTORY_POINTS_PUZZLE_B
+    from ROB_semestralka.src.utils import visualize_trajectory, plot_trajectory_3d
     
     print("Interpolation Demo")
     print("=" * 60)

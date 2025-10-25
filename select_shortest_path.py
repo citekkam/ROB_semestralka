@@ -5,6 +5,7 @@ Používá Euklidovskou vzdálenost v kloubovém prostoru (joint space).
 """
 
 import numpy as np
+from rpds import List
 
 
 def normalize_angle(angle):
@@ -12,6 +13,50 @@ def normalize_angle(angle):
     Normalizuje úhel do rozsahu [-pi, pi].
     """
     return np.arctan2(np.sin(angle), np.cos(angle))
+
+
+def sort_shortest_path(q_current: np.ndarray, q_targets, debug: bool = False):
+    """
+    Sort target configurations by distance from current position.
+    Uses Euclidean distance in joint space with angle normalization.
+    
+    Args:
+        q_current: Current robot joint configuration (6 joints)
+        q_targets: List of possible target joint configurations
+        debug: If True, prints detailed distance information
+    
+    Returns:
+        List of joint configurations sorted by distance from q_current (closest first)
+    """
+    
+    distances = []
+    
+    for i, q_target in enumerate(q_targets):
+        # Compute difference
+        diff = np.array(q_target) - np.array(q_current)
+        
+        # Normalize angles to range [-pi, pi]
+        normalized_diff = np.array([normalize_angle(d) for d in diff])
+        
+        # Apply joint weights
+        weighted_diff = normalized_diff
+        
+        # Calculate weighted Euclidean distance
+        dist = np.linalg.norm(weighted_diff)
+        
+        distances.append((i, dist, normalized_diff))
+
+        if debug:
+            print(f"Configuration {i}: distance = {dist:.6f} rad")
+            print(f"  Δq = {normalized_diff}")
+    
+    # Sort by distance (ascending)
+    sorted_distances = sorted(distances, key=lambda x: x[1])
+    
+    # Extract and return the configurations in sorted order
+    sorted_q_targets = [q_targets[idx] for idx, _, _ in sorted_distances]
+    
+    return sorted_q_targets
 
 
 def compute_joint_distance(q_current, q_target, joint_weights=None):
@@ -108,7 +153,7 @@ if __name__ == "__main__":
     print(f"\nVypočítávám vzdálenosti ke všem možným konfiguracím...\n")
     
     # Váhy pro klouby - silná penalizace pro klouby 3 a 5
-    joint_weights = np.array([1.0, 1.0, 1.0, 10.0, 1.0, 10.0])
+    joint_weights = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     
     # Získáme seřazené indexy podle vzdálenosti
     sorted_distances = find_shortest_path(robot_get_q, robot_qs, joint_weights)
@@ -118,3 +163,8 @@ if __name__ == "__main__":
     for idx, dist, normalized_diff in sorted_distances:
         print(f"Index: {idx}, Vzdálenost: {dist:.6f} rad, Δq[3]: {normalized_diff[3]:+.6f} rad, Δq[5]: {normalized_diff[5]:+.6f} rad")
     print("=" * 70)
+    
+    path_robot = sort_shortest_path(robot_get_q, robot_qs, debug=True)
+    print("\nSeřazené konfigurace podle vzdálenosti:")
+    for target in enumerate(path_robot):
+        print(f"Index: {target[0]}, Konfigurace: {target[1]}")

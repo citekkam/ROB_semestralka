@@ -9,8 +9,8 @@ from numpy.typing import ArrayLike
 import numpy as np
 import cv2  # noqa
 from PIL import Image
-from se3 import SE3
-from so3 import SO3
+from ROB_semestralka.src.se3 import SE3
+from ROB_semestralka.src.so3 import SO3
 
 import os
 import yaml

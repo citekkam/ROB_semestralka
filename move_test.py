@@ -7,7 +7,7 @@ from homofraphy import hom2se3, load_image_yaml_pairs, find_hoop_homography
 from homofraphy import find_aruco, get_aruco_world_pos, get_puzzle_base, CRC_OFF, get_base_T, homography_check
 from robot_calibration.calibration_move import move_to_pos_T, robot_calibration
 
-from so3 import SO3
+from ROB_semestralka.src.so3 import SO3
 robot = CRS93()
 robot.initialize(home = False)
 robot.soft_home()

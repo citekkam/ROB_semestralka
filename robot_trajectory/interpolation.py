@@ -12,8 +12,8 @@ from pathlib import Path
 # Add parent directory to path to import SE3 and SO3
 sys.path.append(str(Path(__file__).parent.parent))
 
-from se3 import SE3
-from so3 import SO3
+from ROB_semestralka.src.se3 import SE3
+from ROB_semestralka.src.so3 import SO3
 
 
 def interpolate_position_linear(p1, p2, t):
@@ -178,8 +178,8 @@ def generate_traj_len(trajectory_points, segment_length=0.01):
 
 if __name__ == "__main__":
     # Example usage
-    from trajectory_points import TRAJECTORY_POINTS_PUZZLE_B
-    from utils import visualize_trajectory, plot_trajectory_3d
+    from ROB_semestralka.src.trajectory_points import TRAJECTORY_POINTS_PUZZLE_B
+    from ROB_semestralka.src.utils import visualize_trajectory, plot_trajectory_3d
     
     print("Interpolation Demo")
     print("=" * 60)

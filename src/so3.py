@@ -30,7 +30,12 @@ class SO3:
         v = np.asarray(rot_vector)
         assert v.shape == (3,)
         theta = np.linalg.norm(v)
-        v_new = v/theta
+        
+        # Handle small angles (near-zero rotation) to avoid division by zero
+        if theta < 1e-10:
+            return SO3(np.eye(3))
+        
+        v_new = v / theta
         wx = v_new[0]
         wy = v_new[1]
         wz = v_new[2]
