@@ -282,6 +282,8 @@ def homography_check(img: ArrayLike, H: np.ndarray) -> np.ndarray:
     world_pos = H @ np.array([centers[0][0], centers[0][1], 1])
     return world_pos / world_pos[2]
 
+
+
 if __name__ == "__main__":
     print(CRC_OFF)
     imgs, hoop_pos = load_image_yaml_pairs()

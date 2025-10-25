@@ -1,7 +1,7 @@
 import numpy as np
 from ctu_crs import CRS93
 from select_shortest_path import find_shortest_path
-from ROB_semestralka.camera.dataset_creator import next_filename, uloz_data
+# from ROB_semestralka.camera.dataset_creator import next_filename, uloz_data
 
 robot = CRS93()
 robot.initialize(home=False)
