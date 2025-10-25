@@ -1,1 +1,0 @@
-/home/david/School/rob/Semestralka/ROB_semestralka/robot_urdf/launch/display.launch.py
