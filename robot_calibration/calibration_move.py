@@ -30,9 +30,9 @@ if str(ROOT_DIR) not in sys.path:
 if SRC_DIR.exists() and str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-# Correct module imports
-from test_ikt6.ikt6_python.robot import ikt6_robot_init
-from test_ikt6.ikt6_python.kinematics import ikt6_ikt, ikt6_dkt_T, ikt6_dkt
+# # Correct module imports
+# from test_ikt6.ikt6_python.robot import ikt6_robot_init
+# from test_ikt6.ikt6_python.kinematics import ikt6_ikt, ikt6_dkt_T, ikt6_dkt
 
 from ctu_crs import CRS93
 from select_shortest_path import find_shortest_path
