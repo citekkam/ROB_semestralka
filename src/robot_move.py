@@ -15,6 +15,7 @@ from pathlib import Path
 from numpy.typing import ArrayLike
 
 from ctu_crs import CRS93, CRS97
+from robot_trajectory import RobotTrajectory
 from se3 import SE3
 from so3 import SO3
 
@@ -33,6 +34,7 @@ class RobotMove:
             joint_weights: Weights for joint distance calculation (default: [1,1,1,1,1,1])
         """
         self.robot = robot
+        self.trajectory = RobotTrajectory
         self.joint_weights = joint_weights if joint_weights is not None else np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     
     @classmethod

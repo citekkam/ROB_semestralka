@@ -36,3 +36,11 @@
 
 # Convert to homogeneous matrices
     matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)
+
+
+## Update combine RobotTrajectory into RobotMove:
+### Usage:
+    robot_mover = RobotMove.create("CRS93")
+    trajectory = robot_mover.get_trajectory('A', segment_length=0.01)
+    #or 
+    matrices = robot_mover.get_trajectory_matrices('B', segment_length=0.005)
