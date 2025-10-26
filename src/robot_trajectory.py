@@ -269,89 +269,6 @@ class RobotTrajectory:
         
         return self.trajectory
     
-    def get_trajectory_as_matrices(self) -> list[np.ndarray]:
-        """
-        Get trajectory as list of 4x4 homogeneous transformation matrices.
-        
-        Returns:
-            List of 4x4 numpy arrays
-        """
-        return [T.homogeneous() for T in self.trajectory]
-    
-    def get_trajectory_as_poses(self) -> np.ndarray:
-        """
-        Get trajectory as array of poses [x, y, z, roll, pitch, yaw].
-        
-        Returns:
-            Nx6 numpy array where each row is [x, y, z, roll, pitch, yaw]
-        """
-        poses = []
-        for T in self.trajectory:
-            # Extract position
-            position = T.translation
-            
-            # Extract euler angles from rotation (ZYX convention)
-            R = T.rotation.rot
-            
-            # Convert rotation matrix to euler angles (ZYX)
-            # This is the inverse of the from_euler_angles method
-            if R[2, 0] < 1:
-                if R[2, 0] > -1:
-                    pitch = np.arcsin(-R[2, 0])
-                    roll = np.arctan2(R[2, 1], R[2, 2])
-                    yaw = np.arctan2(R[1, 0], R[0, 0])
-                else:
-                    pitch = np.pi / 2
-                    roll = -np.arctan2(-R[1, 2], R[1, 1])
-                    yaw = 0
-            else:
-                pitch = -np.pi / 2
-                roll = np.arctan2(-R[1, 2], R[1, 1])
-                yaw = 0
-            
-            poses.append([position[0], position[1], position[2], roll, pitch, yaw])
-        
-        return np.array(poses)
-    
-    def get_trajectory_positions(self) -> np.ndarray:
-        """
-        Get trajectory positions only (without rotation).
-        
-        Returns:
-            Nx3 numpy array of positions
-        """
-        return np.array([T.translation for T in self.trajectory])
-    
-    def compute_trajectory_length(self) -> float:
-        """
-        Compute total trajectory length (sum of segment distances).
-        
-        Returns:
-            Total trajectory length in meters
-        """
-        if len(self.trajectory) < 2:
-            return 0.0
-        
-        total_length = 0.0
-        for i in range(len(self.trajectory) - 1):
-            distance = np.linalg.norm(
-                self.trajectory[i + 1].translation - self.trajectory[i].translation
-            )
-            total_length += distance
-        
-        return total_length
-    
-    def print_info(self) -> None:
-        """Print trajectory information."""
-        print("=" * 70)
-        print("ROBOT TRAJECTORY INFO")
-        print("=" * 70)
-        print(f"Number of waypoints: {len(self.waypoints)}")
-        print(f"Number of trajectory points: {len(self.trajectory)}")
-        if self.trajectory:
-            print(f"Trajectory length: {self.compute_trajectory_length():.4f} m")
-        print()
-    
     @classmethod
     def from_puzzle(cls, puzzle: str) -> 'RobotTrajectory':
         """
@@ -368,117 +285,102 @@ class RobotTrajectory:
             traj.generate_by_length(0.01)
         """
         return cls(puzzle=puzzle)
+    
+    # ========================================================================
+    # SIMPLIFIED STATIC METHOD - ONE-CALL GENERATION
+    # ========================================================================
+    
+    @staticmethod
+    def get_trajectory_se3(puzzle: str, segment_length: float = 0.01,
+                          num_points: int | None = None) -> list[SE3]:
+        """
+        Generate and return trajectory as SE3 objects in one call.
+        
+        Args:
+            puzzle: Puzzle identifier ('A', 'B', 'C', 'D', or 'E')
+            segment_length: Spacing between points in meters (default: 0.01m)
+            num_points: If provided, uses fixed point count instead of segment_length
+        
+        Returns:
+            List of SE3 transformation objects
+        
+        Example:
+            trajectory = RobotTrajectory.get_trajectory_se3('D', segment_length=0.02)
+        """
+        traj = RobotTrajectory(puzzle=puzzle)
+        
+        if num_points is not None:
+            return traj.generate_by_count(num_points)
+        else:
+            return traj.generate_by_length(segment_length)
+    
+    @staticmethod
+    def to_homogeneous_matrices(trajectory: list[SE3]) -> list[np.ndarray]:
+        """
+        Convert SE3 trajectory to list of 4x4 homogeneous transformation matrices.
+        
+        Args:
+            trajectory: List of SE3 transformation objects
+        
+        Returns:
+            List of 4x4 numpy arrays (homogeneous transformation matrices)
+        
+        Example:
+            trajectory = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)
+            matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)
+        """
+        return [T.homogeneous() for T in trajectory]
 
 
 # Example usage
 if __name__ == "__main__":
-    """Example usage of RobotTrajectory class with predefined puzzles."""
+    """Example usage of RobotTrajectory class with simplified API."""
     
     print("=" * 70)
-    print("ROBOT TRAJECTORY CLASS - USAGE EXAMPLES")
+    print("ROBOT TRAJECTORY CLASS - SIMPLIFIED USAGE")
     print("=" * 70)
     print()
     
     # ========================================================================
-    # METHOD 1: Load predefined puzzle trajectory
+    # SIMPLIFIED API - ONE-LINE TRAJECTORY GENERATION
     # ========================================================================
-    print("Method 1: Load predefined puzzle trajectory")
+    print("✨ Generate trajectory in one call:")
     print("-" * 70)
     
-    # Option 1a: Using constructor with puzzle parameter
-    traj_a = RobotTrajectory(puzzle='A')
-    print(f"Puzzle A - Waypoints: {len(traj_a.waypoints)}")
+    # Generate trajectory as SE3 objects with segment_length
+    trajectory = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)
+    print(f"✅ Puzzle A: Generated {len(trajectory)} SE3 transformations (1cm spacing)")
     
-    # Option 1b: Using from_puzzle class method
-    traj_b = RobotTrajectory.from_puzzle('B')
-    print(f"Puzzle B - Waypoints: {len(traj_b.waypoints)}")
+    trajectory = RobotTrajectory.get_trajectory_se3('B', segment_length=0.005)
+    print(f"✅ Puzzle B: Generated {len(trajectory)} SE3 transformations (5mm spacing)")
+    
+    # Or use fixed number of points
+    trajectory = RobotTrajectory.get_trajectory_se3('C', num_points=100)
+    print(f"✅ Puzzle C: Generated {len(trajectory)} SE3 transformations (100 points)")
+    
+    # Convert to homogeneous matrices
+    matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)
+    print(f"✅ Converted to {len(matrices)} homogeneous matrices (4x4)")
+    print(f"   Example matrix:\n{matrices[0]}")
     print()
     
     # ========================================================================
-    # METHOD 2: Generate trajectory for a puzzle
+    # VISUALIZATION
     # ========================================================================
-    print("Method 2: Generate trajectory for Puzzle B")
+    print("📊 Visualize trajectory:")
     print("-" * 70)
     
-    # Generate trajectory with fixed point count
-    traj_b.generate_by_count(num_points_per_segment=20)
-    traj_b.print_info()
+    # Generate trajectory for visualization
+    viz_trajectory = RobotTrajectory.get_trajectory_se3('B', segment_length=0.01)
     
-    # ========================================================================
-    # METHOD 3: Generate trajectory with fixed spacing
-    # ========================================================================
-    print("\nMethod 3: Generate trajectory for Puzzle C with fixed spacing")
-    print("-" * 70)
+    print("Text visualization:")
+    visualize_trajectory(viz_trajectory)
     
-    traj_c = RobotTrajectory.from_puzzle('C')
-    traj_c.generate_by_length(segment_length=0.005)  # 5mm spacing
-    traj_c.print_info()
-    
-    # ========================================================================
-    # METHOD 4: Custom waypoints (manual definition)
-    # ========================================================================
-    print("\nMethod 4: Create trajectory from custom waypoints")
-    print("-" * 70)
-    
-    # Create rotation matrix (180° around Y-axis)
-    rotation_matrix = np.array([
-        [-1.0,  0.0,  0.0],
-        [ 0.0,  1.0,  0.0],
-        [ 0.0,  0.0, -1.0]
-    ])
-    rotation = SO3(rotation_matrix)
-    
-    # Define custom waypoints
-    custom_waypoints = [
-        SE3(translation=np.array([0.0, 0.0, 0.2]), rotation=rotation),
-        SE3(translation=np.array([0.1, 0.0, 0.15]), rotation=rotation),
-        SE3(translation=np.array([0.1, 0.1, 0.1]), rotation=rotation),
-    ]
-    
-    traj_custom = RobotTrajectory(waypoints=custom_waypoints)
-    traj_custom.generate_by_count(num_points_per_segment=10)
-    traj_custom.print_info()
-    
-    # ========================================================================
-    # METHOD 5: Get trajectory in different formats
-    # ========================================================================
-    print("\nMethod 5: Export trajectory in different formats")
-    print("-" * 70)
-    
-    # Use Puzzle A for demonstration
-    traj_demo = RobotTrajectory.from_puzzle('A')
-    traj_demo.generate_by_length(segment_length=0.01)
-    
-    matrices = traj_demo.get_trajectory_as_matrices()
-    print(f"As matrices: {len(matrices)} transformation matrices (4x4)")
-    
-    poses = traj_demo.get_trajectory_as_poses()
-    print(f"As poses: {poses.shape} array [x, y, z, roll, pitch, yaw]")
-    
-    positions = traj_demo.get_trajectory_positions()
-    print(f"As positions: {positions.shape} array [x, y, z]")
-    
-    # ========================================================================
-    # METHOD 6: Visualize trajectory
-    # ========================================================================
-    print("\nMethod 6: Visualize trajectory")
-    print("-" * 70)
-    
-    # Create trajectory for visualization
-    traj_viz = RobotTrajectory.from_puzzle('B')
-    traj_viz.generate_by_length(segment_length=0.01)
-    
-    # Text-based visualization (always works)
-    print("\nText visualization of trajectory:")
-    visualize_trajectory(traj_viz.trajectory)
-    
-    # 3D plot visualization (requires matplotlib)
-    print("\n📊 Opening 3D plot visualization...")
-    print("(Close the plot window to continue)")
+    print("\n3D plot visualization (close window to continue)...")
     try:
-        plot_trajectory_3d(traj_viz.trajectory)
+        plot_trajectory_3d(viz_trajectory)
     except ImportError:
-        print("⚠️  Matplotlib not available. Install with: pip install matplotlib")
+        print("⚠️  Matplotlib not available. Install: pip install matplotlib")
     except Exception as e:
         print(f"⚠️  Could not create plot: {e}")
     
@@ -486,22 +388,19 @@ if __name__ == "__main__":
     # QUICK REFERENCE
     # ========================================================================
     print("\n" + "=" * 70)
-    print("QUICK REFERENCE")
+    print("⚡ QUICK REFERENCE")
     print("=" * 70)
-    print("# Load puzzle and generate trajectory:")
-    print("traj = RobotTrajectory.from_puzzle('B')")
-    print("traj.generate_by_length(0.01)  # 1cm spacing")
+    print("# Generate trajectory in one line:")
+    print("trajectory = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)")
+    print("trajectory = RobotTrajectory.get_trajectory_se3('B', num_points=100)")
     print()
-    print("# Get trajectory as transformation matrices:")
-    print("matrices = traj.get_trajectory_as_matrices()")
+    print("# Convert to homogeneous matrices:")
+    print("matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)")
     print()
-    print("# Get trajectory as poses [x,y,z,roll,pitch,yaw]:")
-    print("poses = traj.get_trajectory_as_poses()")
-    print()
-    print("# Visualize trajectory:")
+    print("# Visualize:")
     print("from utils import visualize_trajectory, plot_trajectory_3d")
-    print("visualize_trajectory(traj.trajectory)  # Text output")
-    print("plot_trajectory_3d(traj.trajectory)    # 3D plot")
+    print("visualize_trajectory(trajectory)  # Text output")
+    print("plot_trajectory_3d(trajectory)    # 3D plot")
     print()
     print("Available puzzles: A, B, C, D, E")
     print("=" * 70)

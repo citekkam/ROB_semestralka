@@ -26,4 +26,13 @@
     calibration_file = "./robot_calibration/robot_calibration/calibration_positions.yaml"
     imgs, transforms = robot_mover.calibration_move(calibration_file)
 
+
+
 # RobotTrajectory class:
+## to get robot trajectories in form of se3
+    trajectory = RobotTrajectory.get_trajectory_se3('C', num_points=100)
+    ## or 
+    trajectory = RobotTrajectory.get_trajectory_se3('B', segment_length=0.005)
+
+# Convert to homogeneous matrices
+    matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)
