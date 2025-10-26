@@ -25,7 +25,6 @@ from trajectory_points import (
     TRAJECTORY_POINTS_PUZZLE_D,
     TRAJECTORY_POINTS_PUZZLE_E,
 )
-from numpy.typing import ArrayLike
 from utils import visualize_trajectory, plot_trajectory_3d
 
 
@@ -35,7 +34,7 @@ class RobotTrajectory:
     Supports linear position interpolation and SLERP rotation interpolation.
     """
 
-    def __init__(self, waypoints: list[SE3] | None = None, puzzle: str | None = None):
+    def __init__(self, waypoints: list | None = None, puzzle: str | None = None):
         """
         Initialize RobotTrajectory with optional waypoints or puzzle name.
         
@@ -53,7 +52,7 @@ class RobotTrajectory:
         self.trajectory = []
     
     @staticmethod
-    def _load_puzzle_waypoints(puzzle: str) -> list[SE3]:
+    def _load_puzzle_waypoints(puzzle: str) -> list:
         """
         Load predefined trajectory waypoints for a specific puzzle.
         
@@ -89,7 +88,7 @@ class RobotTrajectory:
         """
         self.waypoints.append(waypoint)
     
-    def add_waypoints(self, waypoints: list[SE3]) -> None:
+    def add_waypoints(self, waypoints: list) -> None:
         """
         Add multiple waypoints to the trajectory.
         
@@ -166,7 +165,7 @@ class RobotTrajectory:
         # Create interpolated SE3 transformation
         return SE3(translation=p_interp, rotation=R_interp)
     
-    def generate_segment(self, T_start: SE3, T_end: SE3, num_points: int = 50) -> list[SE3]:
+    def generate_segment(self, T_start: SE3, T_end: SE3, num_points: int = 50) -> list:
         """
         Generate a trajectory segment between two poses with fixed point count.
         
@@ -187,7 +186,7 @@ class RobotTrajectory:
         return trajectory_segment
     
     def generate_segment_by_length(self, T_start: SE3, T_end: SE3, 
-                                   segment_length: float = 0.01) -> list[SE3]:
+                                   segment_length: float = 0.01) -> list:
         """
         Generate a trajectory segment with fixed spacing between points.
         
@@ -207,7 +206,7 @@ class RobotTrajectory:
         
         return self.generate_segment(T_start, T_end, num_points)
     
-    def generate_by_count(self, num_points_per_segment: int = 50) -> list[SE3]:
+    def generate_by_count(self, num_points_per_segment: int = 50) -> list:
         """
         Generate full trajectory with fixed point count per segment.
         
@@ -238,7 +237,7 @@ class RobotTrajectory:
         
         return self.trajectory
     
-    def generate_by_length(self, segment_length: float = 0.01) -> list[SE3]:
+    def generate_by_length(self, segment_length: float = 0.01) -> list:
         """
         Generate full trajectory with fixed spacing between points.
         
@@ -292,7 +291,7 @@ class RobotTrajectory:
     
     @staticmethod
     def get_trajectory_se3(puzzle: str, segment_length: float = 0.01,
-                          num_points: int | None = None) -> list[SE3]:
+                          num_points: int | None = None) -> list:
         """
         Generate and return trajectory as SE3 objects in one call.
         
@@ -315,7 +314,7 @@ class RobotTrajectory:
             return traj.generate_by_length(segment_length)
     
     @staticmethod
-    def to_homogeneous_matrices(trajectory: list[SE3]) -> list[np.ndarray]:
+    def to_homogeneous_matrices(trajectory: list) -> list:
         """
         Convert SE3 trajectory to list of 4x4 homogeneous transformation matrices.
         

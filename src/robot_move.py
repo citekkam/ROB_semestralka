@@ -12,7 +12,6 @@ Date: 2025-10-25
 import numpy as np
 import yaml
 from pathlib import Path
-from numpy.typing import ArrayLike
 
 from ctu_crs import CRS93, CRS97
 from robot_trajectory import RobotTrajectory
@@ -77,7 +76,7 @@ class RobotMove:
         # Create and return RobotMove instance
         return cls(robot, joint_weights)
 
-    def select_shortest_path(self, q_current: np.ndarray, q_targets: ArrayLike, debug: bool = False) -> tuple:
+    def select_shortest_path(self, q_current: np.ndarray, q_targets: list, debug: bool = False) -> list:
         """
         Find the shortest path from current position to one of the target positions.
         Uses Euclidean distance in joint space with angle normalization.
@@ -119,7 +118,7 @@ class RobotMove:
         sorted_distances = sorted(distances, key=lambda x: x[1])
         return sorted_distances
     
-    def sort_shortest_path(self, q_current: np.ndarray, q_targets: ArrayLike, debug: bool = False) -> np.ndarray:
+    def sort_shortest_path(self, q_current: np.ndarray, q_targets: list, debug: bool = False) -> np.ndarray:
         """
         Sort target configurations by distance from current position.
         Returns the configurations themselves sorted by distance (closest first).
@@ -271,7 +270,7 @@ class RobotMove:
         print("❌ No valid configuration found within robot limits")
         return False
     
-    def calibration_move(self, positions_file: str, soft_home: bool = True) -> tuple[tuple, tuple]:
+    def calibration_move(self, positions_file: str, soft_home: bool = True) -> tuple:
         """
         Execute robot calibration routine by moving through predefined positions.
         Captures images and transformation matrices at each position.
@@ -382,7 +381,7 @@ class RobotMove:
         return (imgs, transformation_matrices)
     
     @staticmethod
-    def _load_calibration_positions(yaml_file: str) -> tuple:
+    def _load_calibration_positions(yaml_file: str) -> list:
         """
         Load calibration positions from YAML file.
         
