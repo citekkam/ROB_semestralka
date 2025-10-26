@@ -407,117 +407,117 @@ class RobotMove:
         return positions
 
 
-# Example usage
-if __name__ == "__main__":
-    """Example usage of RobotMove class."""
+# # Example usage
+# if __name__ == "__main__":
+#     """Example usage of RobotMove class."""
     
-    print("="*70)
-    print("ROBOTMOVE CLASS - USAGE EXAMPLES")
-    print("="*70)
-    print()
+#     print("="*70)
+#     print("ROBOTMOVE CLASS - USAGE EXAMPLES")
+#     print("="*70)
+#     print()
     
-    # ========================================================================
-    # METHOD 1: Use the factory method (Easiest way!)
-    # ========================================================================
-    print("Method 1: Using factory method")
-    print("-" * 70)
+#     # ========================================================================
+#     # METHOD 1: Use the factory method (Easiest way!)
+#     # ========================================================================
+#     print("Method 1: Using factory method")
+#     print("-" * 70)
     
-    # Simply specify robot type - everything else is handled automatically
-    robot_mover = RobotMove.create("CRS93")  # or "CRS97"
+#     # Simply specify robot type - everything else is handled automatically
+#     robot_mover = RobotMove.create("CRS93")  # or "CRS97"
 
-    print("Robot initialized and ready to use!")
-    print()
+#     print("Robot initialized and ready to use!")
+#     print()
 
-    # Access robot methods through robot_mover.robot
-    q = robot_mover.robot.get_q()
-    robot_mover.robot.move_to_q(q)
-    robot_mover.robot.wait_for_motion_stop()
-    robot_mover.robot.grab_image()
-    # ========================================================================
+#     # Access robot methods through robot_mover.robot
+#     q = robot_mover.robot.get_q()
+#     robot_mover.robot.move_to_q(q)
+#     robot_mover.robot.wait_for_motion_stop()
+#     robot_mover.robot.grab_image()
+#     # ========================================================================
 
 
-    # ========================================================================
-    # METHOD 2: Manual initialization (More control)
-    # ========================================================================
-    print("Method 2: Manual initialization")
-    print("-" * 70)
+#     # ========================================================================
+#     # METHOD 2: Manual initialization (More control)
+#     # ========================================================================
+#     print("Method 2: Manual initialization")
+#     print("-" * 70)
     
-    # Choose robot type
-    ROBOT_TYPE = "CRS93"  # Change to "CRS97" to use the other robot
+#     # Choose robot type
+#     ROBOT_TYPE = "CRS93"  # Change to "CRS97" to use the other robot
     
-    # Initialize robot
-    print(f"Initializing {ROBOT_TYPE}...")
-    if ROBOT_TYPE == "CRS93":
-        robot = CRS93()
-    elif ROBOT_TYPE == "CRS97":
-        robot = CRS97()
-    else:
-        raise ValueError(f"Unknown robot type: {ROBOT_TYPE}")
+#     # Initialize robot
+#     print(f"Initializing {ROBOT_TYPE}...")
+#     if ROBOT_TYPE == "CRS93":
+#         robot = CRS93()
+#     elif ROBOT_TYPE == "CRS97":
+#         robot = CRS97()
+#     else:
+#         raise ValueError(f"Unknown robot type: {ROBOT_TYPE}")
     
-    robot.initialize(home=False)
-    robot.soft_home()
+#     robot.initialize(home=False)
+#     robot.soft_home()
     
-    # Create RobotMove with custom weights
-    # joint_weights = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-    # robot_mover = RobotMove(robot, joint_weights)
-    robot_mover = RobotMove(robot)
-    print(f"{ROBOT_TYPE} initialized successfully")
-    print(f"   Joint limits: q_min={robot.q_min}")
-    print(f"                 q_max={robot.q_max}")
-    print()
-    # ========================================================================
+#     # Create RobotMove with custom weights
+#     # joint_weights = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+#     # robot_mover = RobotMove(robot, joint_weights)
+#     robot_mover = RobotMove(robot)
+#     print(f"{ROBOT_TYPE} initialized successfully")
+#     print(f"   Joint limits: q_min={robot.q_min}")
+#     print(f"                 q_max={robot.q_max}")
+#     print()
+#     # ========================================================================
 
 
-    # ========================================================================
-    # USAGE EXAMPLES
-    # ========================================================================
-    print("="*70)
-    print("USAGE EXAMPLES")
-    print("="*70)
+#     # ========================================================================
+#     # USAGE EXAMPLES
+#     # ========================================================================
+#     print("="*70)
+#     print("USAGE EXAMPLES")
+#     print("="*70)
     
-    # ========================================================================
-    # Example 1: Move to a specific pose
-    # ========================================================================  
-    print("\nExample 1: Moving to target pose")
-    print("-" * 70)
-    target_pose = np.array([0.4, 0.0, 0.5, np.pi, 0.0, np.pi])
-    print(f"Target: x={target_pose[0]}, y={target_pose[1]}, z={target_pose[2]}")
-    # success = robot_mover.move_to_pose(target_pose)
-    print("(Commented out for safety)")
-    # ========================================================================
+#     # ========================================================================
+#     # Example 1: Move to a specific pose
+#     # ========================================================================  
+#     print("\nExample 1: Moving to target pose")
+#     print("-" * 70)
+#     target_pose = np.array([0.4, 0.0, 0.5, np.pi, 0.0, np.pi])
+#     print(f"Target: x={target_pose[0]}, y={target_pose[1]}, z={target_pose[2]}")
+#     # success = robot_mover.move_to_pose(target_pose)
+#     print("(Commented out for safety)")
+#     # ========================================================================
     
 
-    # ========================================================================
-    # Example 2: Run calibration routine
-    # ========================================================================
-    print("\nExample 2: Calibration routine")
-    print("-" * 70)
-    calibration_file = "./robot_calibration/robot_calibration/calibration_positions.yaml"
-    print(f"Calibration file: {calibration_file}")
-    # imgs, transforms = robot_mover.calibration_move(calibration_file)
-    # print(f"Collected {len(imgs)} images and {len(transforms)} matrices")
-    print("(Commented out for safety)")
-    # ========================================================================
+#     # ========================================================================
+#     # Example 2: Run calibration routine
+#     # ========================================================================
+#     print("\nExample 2: Calibration routine")
+#     print("-" * 70)
+#     calibration_file = "./robot_calibration/robot_calibration/calibration_positions.yaml"
+#     print(f"Calibration file: {calibration_file}")
+#     # imgs, transforms = robot_mover.calibration_move(calibration_file)
+#     # print(f"Collected {len(imgs)} images and {len(transforms)} matrices")
+#     print("(Commented out for safety)")
+#     # ========================================================================
 
 
-    # ========================================================================
-    # Example 3: Move to a target transformation matrix
-    # ========================================================================
-    print("\nExample 3: Moving to target pose using transformation matrix")
-    print("-" * 70)
-    target_T = np.array([
-        [-1.0,  0.0,  0.0,  0.4],
-        [ 0.0,  1.0,  0.0,  0.0],
-        [ 0.0,  0.0, -1.0,  0.5],
-        [ 0.0,  0.0,  0.0,  1.0]
-    ])
-    print(f"Target Transformation Matrix:\n{target_T}")
-    # success = robot_mover.move_to_pose_T(target_T)
-    print("(Commented out for safety)")
-    # ========================================================================
+#     # ========================================================================
+#     # Example 3: Move to a target transformation matrix
+#     # ========================================================================
+#     print("\nExample 3: Moving to target pose using transformation matrix")
+#     print("-" * 70)
+#     target_T = np.array([
+#         [-1.0,  0.0,  0.0,  0.4],
+#         [ 0.0,  1.0,  0.0,  0.0],
+#         [ 0.0,  0.0, -1.0,  0.5],
+#         [ 0.0,  0.0,  0.0,  1.0]
+#     ])
+#     print(f"Target Transformation Matrix:\n{target_T}")
+#     # success = robot_mover.move_to_pose_T(target_T)
+#     print("(Commented out for safety)")
+#     # ========================================================================
 
 
-    # Release robot
-    print("\n" + "="*70)
-    robot_mover.robot.release()
-    print("Robot released. Done!")
+#     # Release robot
+#     print("\n" + "="*70)
+#     robot_mover.robot.release()
+#     print("Robot released. Done!")
