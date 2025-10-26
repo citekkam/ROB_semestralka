@@ -196,9 +196,9 @@ def find_aruco(img):
     return ids, corners
 
 
-def get_aruco_world_pos(corners : ArrayLike, H : np.ndarray, img = None) -> List[np.ndarray]:
+def get_aruco_center(corners : ArrayLike, img = None) -> List[np.ndarray]:
     """
-    Get the world position of the aruco markers using the homography H.
+    Get the center position of the aruco markers using the homography H.
     """
     ## TODO Implement correctly
     positions = []
@@ -208,38 +208,72 @@ def get_aruco_world_pos(corners : ArrayLike, H : np.ndarray, img = None) -> List
         if not img is None:
             cv2.circle(img, (int(center[0]), int(center[1])), 5, (0, 255, 0), -1)
         print("center",center)
-        world_pos = H @ center
-        #TODO check how it works
-        print(world_pos)
-        world_pos = world_pos / world_pos[2]
+
         positions.append(center)
-
-
 
 
     return positions
 
 ## TODO move to tranformations.py
-def get_puzzle_base(aruco_ids: List[int], aruco_positions: List[np.ndarray], img = None):
+def get_puzzle_base(aruco_ids: List[int], aruco_corners: List[np.ndarray], H : np.ndarray ,img = None):
+    """
+    Returns SE3 of puzzle base
+    """
+
     if aruco_ids is None:
         raise ValueError("At least two ArUco markers are required to determine the puzzle base.")
     elif len(aruco_ids) == 1:
         raise ValueError("Not yet implemented for one ArUco marker.")
     elif len(aruco_ids) == 2:
-        pos1 = aruco_positions[0]
-        pos2 = aruco_positions[1]
+        # Getting center
+        pos1, pos2 = get_aruco_center(aruco_corners, img)
+        
 
         center = (pos1 + pos2) / 2.0
         if not img is None:
             cv2.circle(img, (int(center[0]), int(center[1])), 5, (0, 255, 0), -1)
-        res = H @ np.array([center[0], center[1], 1])
+        trans = H @ np.array([center[0], center[1], 1])
+        trans /= trans[2]
+        # Setting the z coordinate to be above the table for desired height in meters
+        trans[2] = 0.04
+        R = get_base_rotation(aruco_corners, H)
+        T = SE3(trans, R)
     else:
         raise NotImplementedError("False positives detected, more than two ArUco markers found.")
-    return res / res[2]
+    return T
 
-def get_puzzle_orientation():   
-    pass
 
+def get_base_rotation(aruco_corners: List[np.ndarray], H : np.ndarray):
+    print(aruco_corners)
+    vecs = np.zeros((len(aruco_corners), 2))
+    print(vecs)
+    base_x = np.array([1.0, 0.0])
+    angles = []
+    for c in corners:
+        c0 = H @ np.append(c[0][0], 1)
+        c1 = H @ np.append(c[0][1], 1)
+        c0 = (c0/c0[2])[0:2]
+        c1 = (c1/c1[2])[0:2]
+
+        puzzle_x = c1 - c0
+        puzzle_x = puzzle_x / np.linalg.norm(puzzle_x)
+
+        # There is no divison by norms, because both are unit vectors
+        angle = np.arccos(np.clip(np.dot(base_x, puzzle_x), -1.0, 1.0))
+        if np.cross(base_x, puzzle_x) < 0:
+            angle = -angle
+        angles.append(angle)
+        
+    
+    mean_angle = np.mean(angles)
+    R = np.array([
+        [np.cos(mean_angle), -np.sin(mean_angle), 0],
+        [np.sin(mean_angle), np.cos(mean_angle), 0],
+        [0, 0, 1]
+    ])
+
+    return SO3(R)
+        
 
 def get_base_T(base_pos: np.ndarray, orientation: SO3) -> np.ndarray:
     # CRC_OFF * trans
@@ -297,19 +331,13 @@ if __name__ == "__main__":
     print(ids, corners)
 
 
-    positions = get_aruco_world_pos(corners, H, img)
+    positions = get_aruco_center(corners, img)
     print(positions)
 
-    puzzle_base = get_puzzle_base(ids, positions, img)
-    print(puzzle_base)
+    puzzle_base = get_puzzle_base(ids, corners, H, img)
 
-    T = get_base_T(puzzle_base, SO3(np.array([
-        [-1, 0, 0],
-        [0, 1, 0],
-        [0, 0, -1]
-    ])))
 
-    print("Position of puzzle base: ", T)
+    print("Position of puzzle base: ", puzzle_base)
     trans = hom2se3(np.array(hoop_pos[4]["transformacni_matic"]))
     print("Forward kinematics: ",trans)
     H_check = homography_check(img, H)
