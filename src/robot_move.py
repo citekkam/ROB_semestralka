@@ -423,9 +423,18 @@ if __name__ == "__main__":
     
     # Simply specify robot type - everything else is handled automatically
     robot_mover = RobotMove.create("CRS93")  # or "CRS97"
-    print("✅ Robot initialized and ready to use!")
+
+    print("Robot initialized and ready to use!")
     print()
-    
+
+    # Access robot methods through robot_mover.robot
+    q = robot_mover.robot.get_q()
+    robot_mover.robot.move_to_q(q)
+    robot_mover.robot.wait_for_motion_stop()
+    robot_mover.robot.grab_image()
+    # ========================================================================
+
+
     # ========================================================================
     # METHOD 2: Manual initialization (More control)
     # ========================================================================
@@ -448,14 +457,16 @@ if __name__ == "__main__":
     robot.soft_home()
     
     # Create RobotMove with custom weights
-    joint_weights = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-    robot_mover = RobotMove(robot, joint_weights)
-    
-    print(f"✅ {ROBOT_TYPE} initialized successfully")
+    # joint_weights = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+    # robot_mover = RobotMove(robot, joint_weights)
+    robot_mover = RobotMove(robot)
+    print(f"{ROBOT_TYPE} initialized successfully")
     print(f"   Joint limits: q_min={robot.q_min}")
     print(f"                 q_max={robot.q_max}")
     print()
-    
+    # ========================================================================
+
+
     # ========================================================================
     # USAGE EXAMPLES
     # ========================================================================
@@ -463,15 +474,21 @@ if __name__ == "__main__":
     print("USAGE EXAMPLES")
     print("="*70)
     
+    # ========================================================================
     # Example 1: Move to a specific pose
+    # ========================================================================  
     print("\nExample 1: Moving to target pose")
     print("-" * 70)
     target_pose = np.array([0.4, 0.0, 0.5, np.pi, 0.0, np.pi])
     print(f"Target: x={target_pose[0]}, y={target_pose[1]}, z={target_pose[2]}")
     # success = robot_mover.move_to_pose(target_pose)
     print("(Commented out for safety)")
+    # ========================================================================
     
+
+    # ========================================================================
     # Example 2: Run calibration routine
+    # ========================================================================
     print("\nExample 2: Calibration routine")
     print("-" * 70)
     calibration_file = "./robot_calibration/robot_calibration/calibration_positions.yaml"
@@ -479,8 +496,27 @@ if __name__ == "__main__":
     # imgs, transforms = robot_mover.calibration_move(calibration_file)
     # print(f"Collected {len(imgs)} images and {len(transforms)} matrices")
     print("(Commented out for safety)")
-    
+    # ========================================================================
+
+
+    # ========================================================================
+    # Example 3: Move to a target transformation matrix
+    # ========================================================================
+    print("\nExample 3: Moving to target pose using transformation matrix")
+    print("-" * 70)
+    target_T = np.array([
+        [-1.0,  0.0,  0.0,  0.4],
+        [ 0.0,  1.0,  0.0,  0.0],
+        [ 0.0,  0.0, -1.0,  0.5],
+        [ 0.0,  0.0,  0.0,  1.0]
+    ])
+    print(f"Target Transformation Matrix:\n{target_T}")
+    # success = robot_mover.move_to_pose_T(target_T)
+    print("(Commented out for safety)")
+    # ========================================================================
+
+
     # Release robot
     print("\n" + "="*70)
     robot_mover.robot.release()
-    print("✅ Robot released. Done!")
+    print("Robot released. Done!")
