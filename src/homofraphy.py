@@ -229,25 +229,32 @@ def get_puzzle_base(aruco_ids: List[int], aruco_corners: List[np.ndarray], H : n
     """
 
     if aruco_ids is None:
-        raise ValueError("At least two ArUco markers are required to determine the puzzle base.")
+        raise ValueError("At one ArUco markers are required to determine the puzzle base.")
     elif len(aruco_ids) == 1:
-        raise ValueError("Not yet implemented for one ArUco marker.")
+        pos1 = get_aruco_center(aruco_corners, img)[0]
+        diagonal = [0.0375 * np.sqrt(2), (0.0375) * np.sqrt(2)]
+        if aruco_ids[0] == 1:
+            center = pos1 - diagonal
+        elif aruco_ids[0] == 2:
+            center = pos1 + diagonal
+
+        if not img is None:
+            cv2.circle(img, (int(center[0]), int(center[1])), 5, (0, 255, 0), -1)
     elif len(aruco_ids) == 2:
         # Getting center
         pos1, pos2 = get_aruco_center(aruco_corners, img)
-        
 
         center = (pos1 + pos2) / 2.0
         if not img is None:
             cv2.circle(img, (int(center[0]), int(center[1])), 5, (0, 255, 0), -1)
-        trans = H @ np.array([center[0], center[1], 1])
-        trans /= trans[2]
-        # Setting the z coordinate to be above the table for desired height in meters
-        trans[2] = 0.055
-        R = get_base_rotation(aruco_corners, H)
-        T = SE3(trans, R)
     else:
         raise NotImplementedError("False positives detected, more than two ArUco markers found.")
+    trans = H @ np.array([center[0], center[1], 1])
+    trans /= trans[2]
+    # Setting the z coordinate to be above the table for desired height in meters
+    trans[2] = 0.055
+    R = get_base_rotation(aruco_corners, H)
+    T = SE3(trans, R)
     return T
 
 
