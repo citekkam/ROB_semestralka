@@ -31,19 +31,19 @@ from utils import print_trajectory_info
 # ROTATION = SO3(ROTATION_MATRIX)
 
 
-ROTATION = SO3.ry(np.pi)  # 180° rotation around Y-axis
+ROTATION = SO3() # 180° rotation around Y-axis
 
 # ========== PUZZLE A TRAJECTORY ==========
 # Define trajectory points for Puzzle A as SE3 objects (global constants)
-PUZZLE_A_POINT_1 = SE3(translation=np.array([0.0, 0.0, 0.2]), rotation=ROTATION)
-PUZZLE_A_POINT_2 = SE3(translation=np.array([0.0, 0.0, 0.0]), rotation=ROTATION)
+PUZZLE_A_POINT_1 = SE3(translation=np.array([0.0, 0.0, -0.2]), rotation=ROTATION)
+PUZZLE_A_POINT_2 = SE3(translation=np.array([0.0, 0.0, -0.01]), rotation=ROTATION)
 
 # ========== PUZZLE B TRAJECTORY ==========
 # Define trajectory points for Puzzle B as SE3 objects (global constants)
 PUZZLE_B_POINT_1 = SE3(translation=np.array([0.07, 0.0, 0.2]), rotation=ROTATION)
 PUZZLE_B_POINT_2 = SE3(translation=np.array([0.07, 0.0, 0.15]), rotation=ROTATION)
 PUZZLE_B_POINT_3 = SE3(translation=np.array([0.0, 0.0, 0.08]), rotation=ROTATION)
-PUZZLE_B_POINT_4 = SE3(translation=np.array([0.0, 0.0, 0.0]), rotation=ROTATION)
+PUZZLE_B_POINT_4 = SE3(translation=np.array([0.0, 0.0, 0.01]), rotation=ROTATION)
 
 # ========== PUZZLE C TRAJECTORY ==========
 # Define trajectory points for Puzzle C as SE3 objects (global constants)

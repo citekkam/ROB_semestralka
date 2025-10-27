@@ -242,7 +242,7 @@ def get_puzzle_base(aruco_ids: List[int], aruco_corners: List[np.ndarray], H : n
         trans = H @ np.array([center[0], center[1], 1])
         trans /= trans[2]
         # Setting the z coordinate to be above the table for desired height in meters
-        trans[2] = 0.3
+        trans[2] = 0.055
         R = get_base_rotation(aruco_corners, H)
         T = SE3(trans, R)
     else:

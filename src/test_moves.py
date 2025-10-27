@@ -14,10 +14,6 @@ our_robot.robot.soft_home()
 
 img = our_robot.robot.grab_image()
 
-show_img = cv2.resize(img, (1200, 800))
-cv2.imshow(f"ArUco", show_img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
 
 ids, corners = hm.find_aruco(img)
 
@@ -33,11 +29,40 @@ print("Forward kinematics: ",trans)
 T = SE3(rotation = SO3().ry(np.pi), translation = puzzle_base.translation)
 print(T)
 
-our_robot.move_to_pose_T((T * hm.CRC_OFF.inverse()).homogeneous())
 
-# H_check = hm.homography_check(img, H)
-# print("Homography check: ", H_check)
+## ------------------ A puzzle ----------------
+# trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
 
+# print("matrices", trajectory, sep = "\n")
+
+# puzzle_base = SE3(rotation = puzzle_base.rotation.ry(np.pi), translation = puzzle_base.translation)
+# print(puzzle_base)
+# print("computed", puzzle_base * trajectory[0])
+
+
+# matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory)
+
+# print(matrcies_puzzle)
+
+# our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
+
+
+## ------------------------- B puzzle ---------------
+# TODO fix balet
+trajectory = our_robot.trajectory.get_trajectory_se3('B', segment_length=0.01)
+
+print("matrices", trajectory, sep = "\n")
+
+puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
+print(puzzle_base)
+print("computed", (puzzle_base * trajectory[0]))
+
+matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory)
+print(matrcies_puzzle)
+
+our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
+
+## ------------------------ C puzzle ---------------
 
 show_img = cv2.resize(img, (1200, 800))
 cv2.imshow(f"ArUco", show_img)

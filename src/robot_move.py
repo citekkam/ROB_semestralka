@@ -406,7 +406,29 @@ class RobotMove:
         
         return positions
 
+    def go_traj(self, seq : SE3, CRC_OFF) -> bool:
+        start = seq[0] * SE3(translation = [0,0,-0.03]) * CRC_OFF.inverse()
+        self.move_to_pose_T(start.homogeneous())
+        self.robot.wait_for_motion_stop()
 
+        for T in seq:
+            e_pos = T * CRC_OFF.inverse()
+            print(e_pos)
+            self.move_to_pose_T(e_pos.homogeneous())
+            self.robot.wait_for_motion_stop()
+            
+        seq_i = seq[::-1]
+        for T in seq_i:
+            e_pos = T * CRC_OFF.inverse()
+            print(e_pos)
+            self.move_to_pose_T(e_pos.homogeneous())
+            self.robot.wait_for_motion_stop()
+
+
+        self.move_to_pose_T(start.homogeneous())
+        self.robot.wait_for_motion_stop()
+        self.robot.soft_home()
+            
 # # Example usage
 # if __name__ == "__main__":
 #     """Example usage of RobotMove class."""

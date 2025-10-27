@@ -330,6 +330,15 @@ class RobotTrajectory:
         """
         return [T.homogeneous() for T in trajectory]
 
+    def to_puzzle_matrice(puzzle_base : SE3, matrices : list) -> list:
+        ret = []
+        for T in matrices:
+            # --- TODO - fix tranforamtions
+            T = puzzle_base * T
+            T = SE3(translation = T.translation, rotation = SO3().ry(np.pi))
+            ret.append(T)
+
+        return ret
 
 # Example usage
 if __name__ == "__main__":
