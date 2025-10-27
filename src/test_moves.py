@@ -48,10 +48,17 @@ print(matrcies_puzzle)
 # our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
 # center check
-for i in range(8):
-    z_rot = z_rot = SE3(rotation = SO3().rz(np.pi * (2*i / 8)))
+pos = SE3(puzzle_base.translation + [0,0,0.22], SO3().ry(np.pi))
+print(pos)
+for i in range(12):
+    z_rot = z_rot = SE3(rotation = SO3().rz(-np.pi * (2*i / 12)))
     print(z_rot)
-    
+    our_robot.move_to_pose_T((pos * z_rot * hm.CRC_OFF.inverse()).homogeneous())
+    img = our_robot.robot.grab_image()
+    show_img = cv2.resize(img, (1200, 800))
+    cv2.imshow(f"ArUco", show_img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 ## ------------------------- B puzzle ---------------
 # TODO fix balet
