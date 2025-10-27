@@ -233,7 +233,7 @@ def get_puzzle_base(aruco_ids: List[int], aruco_corners: List[np.ndarray], H : n
     elif len(aruco_ids) == 1:
         center = get_aruco_center(aruco_corners, img)[0]
         print("pos", center)
-        diagonal = [0.0375 * np.sqrt(2), (0.0375) * np.sqrt(2), 0]
+        diagonal = [-0.0375 * np.sqrt(2), (0.0375) * np.sqrt(2), 0]
         trans = H @ np.array([center[0], center[1], 1])
         trans /= trans[2]
         trans[2] = 0.055
@@ -241,9 +241,9 @@ def get_puzzle_base(aruco_ids: List[int], aruco_corners: List[np.ndarray], H : n
         
         ## translation of center
         if aruco_ids[0] == 1:
-            trans = trans - diagonal
+            trans = trans - R.act(diagonal)
         elif aruco_ids[0] == 2:
-            trans = trans + diagonal
+            trans = trans + R.act(diagonal)
 
         T = SE3(trans, R)
 
