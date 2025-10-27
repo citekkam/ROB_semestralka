@@ -338,7 +338,7 @@ class RobotTrajectory:
             T_ee = T * SE3(rotation = SO3().ry(np.pi)) * z_rot
             # T = SE3(translation = T.translation, rotation = SO3().ry(np.pi))
             
-            print(T_ee)
+            # print(T_ee)
             ret.append(T_ee)
 
         return ret
