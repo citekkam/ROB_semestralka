@@ -178,8 +178,14 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     print(len(hoop_vectors))
     
     H , _ = cv2.findHomography(centers, hoop_vectors)
+
+    # saving the homography matrix
+    np.save("H_matrix.npy", H)
     return H
 
+def get_H() -> np.ndarray:
+    H = np.load("H_matrix.npy")
+    return H
 
 def find_aruco(img):
     """
@@ -326,10 +332,13 @@ if __name__ == "__main__":
     H = find_hoop_homography(imgs, hoop_pos)
     print(H)
     img = imgs[4]
+    np.save("H_matrix.npy", H)
 
     ids, corners = find_aruco(img)
     print(ids, corners)
 
+    H_load = np.load("H_matrix.npy")
+    print("Loaded H: ", H_load)
 
     positions = get_aruco_center(corners, img)
     print(positions)
