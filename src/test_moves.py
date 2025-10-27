@@ -57,8 +57,9 @@ print(T)
 # print(puzzle_base)
 # print("computed", (puzzle_base * trajectory[0]))
 
-# matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory)
-# print(matrcies_puzzle)
+# z_rot = SE3(rotation = SO3().rz(np.pi/2))
+
+# matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory, z_rot)
 
 # our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
@@ -71,8 +72,12 @@ puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.tra
 print("base", puzzle_base)
 print("computed", (puzzle_base * trajectory[0]))
 
-matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory)
-print(matrcies_puzzle)
+z_rot = SE3(rotation = SO3().rz(-np.pi/2))
+
+z_rot = SE3(rotation = SO3().rz(-np.pi))
+
+matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory, z_rot)
+
 
 our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
