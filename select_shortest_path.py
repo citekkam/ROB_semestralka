@@ -5,7 +5,6 @@ Používá Euklidovskou vzdálenost v kloubovém prostoru (joint space).
 """
 
 import numpy as np
-from rpds import List
 
 
 def normalize_angle(angle):

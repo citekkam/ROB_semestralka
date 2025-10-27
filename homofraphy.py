@@ -9,8 +9,8 @@ from numpy.typing import ArrayLike
 import numpy as np
 import cv2  # noqa
 from PIL import Image
-from src.se3 import SE3
-from src.so3 import SO3
+from se3 import SE3
+from so3 import SO3
 
 import os
 import yaml
@@ -178,8 +178,14 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     print(len(hoop_vectors))
     
     H , _ = cv2.findHomography(centers, hoop_vectors)
+
+    # saving the homography matrix
+    np.save("H_matrix.npy", H)
     return H
 
+def get_H() -> np.ndarray:
+    H = np.load("H_matrix.npy")
+    return H
 
 def find_aruco(img):
     """
@@ -320,17 +326,19 @@ def homography_check(img: ArrayLike, H: np.ndarray) -> np.ndarray:
 
 if __name__ == "__main__":
     print(CRC_OFF)
-    file = "/home/nguyexu7/Documents/ROB/ROB_semestralka/images/exporty"
-    imgs, hoop_pos = load_image_yaml_pairs(file)
+    imgs, hoop_pos = load_image_yaml_pairs()
 
     # print(imgs, hoop_pos)
     H = find_hoop_homography(imgs, hoop_pos)
     print(H)
     img = imgs[4]
+    np.save("H_matrix.npy", H)
 
     ids, corners = find_aruco(img)
     print(ids, corners)
 
+    H_load = np.load("H_matrix.npy")
+    print("Loaded H: ", H_load)
 
     positions = get_aruco_center(corners, img)
     print(positions)
