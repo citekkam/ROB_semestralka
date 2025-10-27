@@ -31,21 +31,27 @@ print(T)
 
 
 ## ------------------ A puzzle ----------------
-# trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
+trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
 
-# print("matrices", trajectory, sep = "\n")
+print("matrices", trajectory, sep = "\n")
 
-# puzzle_base = SE3(rotation = puzzle_base.rotation.ry(np.pi), translation = puzzle_base.translation)
-# print(puzzle_base)
-# print("computed", puzzle_base * trajectory[0])
+puzzle_base = SE3(rotation = puzzle_base.rotation.ry(np.pi), translation = puzzle_base.translation)
+print(puzzle_base)
+print("computed", puzzle_base * trajectory[0])
 
+z_rot = SE3(rotation = puzzle_base.rotation.inverse())
 
-# matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory)
+matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory, z_rot)
 
-# print(matrcies_puzzle)
+print(matrcies_puzzle)
 
 # our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
+# center check
+for i in range(8):
+    z_rot = z_rot = SE3(rotation = SO3().rz(np.pi * (2*i / 8)))
+    print(z_rot)
+    
 
 ## ------------------------- B puzzle ---------------
 # TODO fix balet
@@ -64,22 +70,23 @@ print(T)
 # our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
 ## ------------------------ C puzzle ---------------
-trajectory = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
+# trajectory = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
 
-print("matrices", trajectory, sep = "\n")
+# print("matrices", trajectory, sep = "\n")
 
-puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
-print("base", puzzle_base)
-print("computed", (puzzle_base * trajectory[0]))
-
-z_rot = SE3(rotation = SO3().rz(-np.pi/2))
-
-z_rot = SE3(rotation = SO3().rz(-np.pi))
-
-matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory, z_rot)
+# puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
+# print("base", puzzle_base)
+# print("computed", (puzzle_base * trajectory[0]))
 
 
-our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
+# z_rot = SE3(rotation = SO3().rz(-np.pi))
+# z_rot = SE3(rotation = SO3().rz(-np.pi/2))
+
+# matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory, z_rot)
+
+# print(matrcies_puzzle)
+# our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
+
 
 
 show_img = cv2.resize(img, (1200, 800))
