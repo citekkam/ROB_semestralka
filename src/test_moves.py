@@ -34,20 +34,19 @@ print(T)
 
 
 ## ------------------ A puzzle ----------------
-# trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
+trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
 
-# print("matrices", trajectory, sep = "\n")
 
-# puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
-# print(puzzle_base)
-# print("computed", puzzle_base * trajectory[0])
+puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
+print(puzzle_base)
+print("computed", puzzle_base * trajectory[0])
 
-# # z_rot = SE3(rotation = puzzle_base.rotation.inverse())
-# # matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory, z_rot)
+# z_rot = SE3(rotation = puzzle_base.rotation.inverse())
+# matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory, z_rot)
 
-# matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
+matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
 
-# print(matrcies_puzzle)
+print(matrcies_puzzle)
 
 our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
@@ -77,17 +76,17 @@ our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
 
 ## ------------------------ C puzzle ---------------
-trajectory = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
+# trajectory = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
 
 
-puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
-print("base", puzzle_base)
-print("computed", (puzzle_base * trajectory[0]))
+# puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
+# print("base", puzzle_base)
+# print("computed", (puzzle_base * trajectory[0]))
 
 
-matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
+# matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
 
-our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
+# our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
 
 
