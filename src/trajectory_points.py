@@ -48,10 +48,12 @@ PUZZLE_B_POINT_4 = SE3(translation=np.array([0.0, 0.0, 0.01]), rotation=ROTATION
 # ========== PUZZLE C TRAJECTORY ==========
 # Define trajectory points for Puzzle C as SE3 objects (global constants)
 # TODO: Define your Puzzle C points here
-PUZZLE_C_POINT_1 = SE3(translation=np.array([0.0, 0.0, 0.2]), rotation=ROTATION)
-PUZZLE_C_POINT_2 = SE3(translation=np.array([0.0, 0.0, 0.15]), rotation=ROTATION)
-PUZZLE_C_POINT_3 = SE3(translation=np.array([0.0, 0.0, 0.08]), rotation=ROTATION)
-PUZZLE_C_POINT_4 = SE3(translation=np.array([0.0, 0.0, 0.0]), rotation=ROTATION)
+PUZZLE_C_POINT_1 = SE3(translation=np.array([-0.05, -0.05, 0.2]), rotation=ROTATION)
+PUZZLE_C_POINT_2 = SE3(translation=np.array([-0.05, -0.05, 0.15]), rotation=ROTATION)
+PUZZLE_C_POINT_3 = SE3(translation=np.array([-0.05, 0.0, 0.1]), rotation=ROTATION)
+PUZZLE_C_POINT_4 = SE3(translation=np.array([0.0, 0.0, 0.05]), rotation=ROTATION)
+PUZZLE_C_POINT_5 = SE3(translation=np.array([0.0, 0.0, 0.01]), rotation=ROTATION)
+
 
 
 # ========== PUZZLE D TRAJECTORY ==========
@@ -77,7 +79,7 @@ TRAJECTORY_POINTS_PUZZLE_A = [PUZZLE_A_POINT_1, PUZZLE_A_POINT_2]
 TRAJECTORY_POINTS_PUZZLE_B = [PUZZLE_B_POINT_1, PUZZLE_B_POINT_2, PUZZLE_B_POINT_3, PUZZLE_B_POINT_4]
 
 # Trajectory sequence for Puzzle C
-TRAJECTORY_POINTS_PUZZLE_C = [PUZZLE_C_POINT_1, PUZZLE_C_POINT_2, PUZZLE_C_POINT_3, PUZZLE_C_POINT_4]
+TRAJECTORY_POINTS_PUZZLE_C = [PUZZLE_C_POINT_1, PUZZLE_C_POINT_2, PUZZLE_C_POINT_3, PUZZLE_C_POINT_4, PUZZLE_C_POINT_5]
 
 # Trajectory sequence for Puzzle D
 TRAJECTORY_POINTS_PUZZLE_D = [PUZZLE_D_POINT_1, PUZZLE_D_POINT_2, PUZZLE_D_POINT_3, PUZZLE_D_POINT_4]
