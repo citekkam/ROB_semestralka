@@ -14,6 +14,7 @@ import yaml
 from pathlib import Path
 
 from ctu_crs import CRS93, CRS97
+from ROB_semestralka.src.homofraphy import CRC_OFF
 from robot_trajectory import RobotTrajectory
 from se3 import SE3
 from so3 import SO3
@@ -405,6 +406,46 @@ class RobotMove:
             positions.append((key, pose))
         
         return positions
+
+    def dif_angle_check(current_q : np.ndarray, target_q : np.ndarray, rng : float) -> bool:
+        for i in range(len(current_q)):
+            diff = abs(current_q[i] - target_q[i])
+            if diff > rng:
+                return False
+        return True
+
+    def ik_sol_check(self, current_q: np.ndarray, target_T: np.ndarray) -> [bool, int]:
+        ik_solutions = self.robot.ik(target_T)
+        sorted_distances = self.select_shortest_path(current_q, ik_solutions)
+        for idx, distance, _ in sorted_distances:
+            q = ik_solutions[idx]
+            if self.dif_angle_check(current_q, q, np.pi/2) and self.robot.in_limits(q):
+                return True, idx
+        return False, None
+    
+    def seq_check (self, current_q: np.ndarray, seq: list, CRC_OFF) -> bool:
+        for T in seq:
+            target_T = T * CRC_OFF.inverse()
+            is_valid, idx = self.ik_sol_check(current_q, target_T)
+            if not is_valid:
+                return False
+        return True
+
+    def valid_traj(self, puzzle_base : SE3, matrices : list) -> None | list:
+        for i in range(8):
+            angle = np.pi * (2*i / 8)
+            z_rot = SE3(rotation = SO3().rz(angle))
+            print(z_rot)
+            seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, z_rot)
+
+            current_q = self.robot.get_q()
+
+            if self.seq_check(current_q, seq, CRC_OFF):
+                return seq
+
+        return None
+
+
 
     def go_traj(self, seq : SE3, CRC_OFF) -> bool:
         start = seq[0] * SE3(translation = [0,0,-0.03]) * CRC_OFF.inverse()
