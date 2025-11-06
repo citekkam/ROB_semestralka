@@ -453,7 +453,7 @@ class RobotMove:
             angle = np.pi * (2*i / 16)
             z_rot = SE3(rotation = SO3().rz(angle))
             # z_rot = SE3(rotation = puzzle_base.rotation.inverse())
-            print(z_rot)
+            # print(z_rot)
             # print(SE3(rotation = puzzle_base.rotation.inverse()))
             seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, z_rot)
 

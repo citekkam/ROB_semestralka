@@ -204,6 +204,7 @@ class Collision:
                 continue
             
             if self.geom_data.collisionResults[k].isCollision():
+                print(f"IN COLLISION: {g1} ↔ {g2}")
                 return True
         
         return False
@@ -245,7 +246,7 @@ class Collision:
             if cr.isCollision():
                 collision_count += 1
                 if verbose:
-                    print(f"⚠️  COLLISION: {g1} ↔ {g2}")
+                    print(f"IN  COLLISION: {g1} ↔ {g2}")
         
         if verbose:
             print(f"\nTotal collisions: {collision_count}")
@@ -337,11 +338,11 @@ def main():
 
     # Test with trajectory A
     in_collision_A = tester.in_collision(q, trajectory_A, radius=0.007, offset=offset)
-    print(f"✅ Trajectory A: {'COLLISION' if in_collision_A else 'NO COLLISION'}")
+    print(f" Trajectory A: {'COLLISION' if in_collision_A else 'NO COLLISION'}")
 
     # Test with trajectory B (clean() is called automatically)
     in_collision_B = tester.in_collision(q, trajectory_B, radius=0.007, offset=offset)
-    print(f"✅ Trajectory B: {'COLLISION' if in_collision_B else 'NO COLLISION'}")
+    print(f" Trajectory B: {'COLLISION' if in_collision_B else 'NO COLLISION'}")
     
     # Or manually clean and test
     # tester.clean()
@@ -350,7 +351,7 @@ def main():
     # in_collision_C = tester.is_in_collision(q)
     
     # Visualize the last trajectory
-    num_collisions = tester.check_collisions(q, verbose=True)
+    # num_collisions = tester.check_collisions(q, verbose=True)
     tester.visualize(q, wait_for_input=True)
     
     print(f"\n✅ Test complete")
