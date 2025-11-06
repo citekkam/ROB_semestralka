@@ -22,7 +22,7 @@ from robot_trajectory import RobotTrajectory
 from se3 import SE3
 
 
-class CollisionTester:
+class Collision:
     """Class for testing collision between robot and trajectory spheres."""
     
     def __init__(self, urdf_path: str = None, mesh_dirs: list = None):
@@ -99,25 +99,22 @@ class CollisionTester:
         
         return sphere_collision, sphere_visual
     
-    def add_trajectory_spheres(self, puzzle: str = 'A', segment_length: float = 0.05,
+    def add_trajectory_spheres(self, trajectory: list, segment_length: float = 0.05,
                               radius: float = 0.03, offset: SE3 = None) -> list:
         """
         Add spheres along trajectory for collision checking.
         
         Args:
-            puzzle: Puzzle identifier ('A', 'B', 'C', 'D', 'E')
-            segment_length: Distance between spheres in meters
+            trajectory: List of SE3 transformations representing the trajectory
+            segment_length: Distance between spheres in meters (used only if resampling)
             radius: Sphere radius in meters
             offset: Optional SE3 transformation for all spheres
         
         Returns:
             List of added sphere pairs
         """
-        # Get trajectory using RobotTrajectory
-        trajectory = RobotTrajectory.get_trajectory_se3(puzzle, segment_length=segment_length)
-        
         offset_str = " with offset" if offset is not None else ""
-        print(f"\n=== Adding {len(trajectory)} spheres from Puzzle {puzzle} trajectory{offset_str} ===")
+        print(f"\n=== Adding {len(trajectory)} spheres from trajectory{offset_str} ===")
         
         spheres = []
         for i, T in enumerate(trajectory):
@@ -125,13 +122,13 @@ class CollisionTester:
             sphere_pair = self.add_sphere(
                 position,
                 radius=radius,
-                name_suffix=f"traj_{puzzle}_{i}",
+                name_suffix=f"traj_{i}",
                 offset=offset
             )
             spheres.append(sphere_pair)
         
         self.trajectory_spheres.extend(spheres)
-        print(f"✓ Added {len(spheres)} spheres (radius={radius}m, spacing={segment_length}m)")
+        print(f"✓ Added {len(spheres)} spheres (radius={radius}m)")
         
         return spheres
     
@@ -158,6 +155,26 @@ class CollisionTester:
         
         # Create geometry data
         self.geom_data = pin.GeometryData(self.collision_model)
+    
+    def clean(self) -> None:
+        """
+        Clean trajectory spheres by reloading the robot model.
+        This is the safest way to remove added geometries.
+        """
+        # Reload the robot model from scratch
+        urdf_path = str((self.robot_model_dir / "urdf" / "crs_a465.urdf").resolve())
+        mesh_dirs = [str(self.robot_model_dir.resolve())]
+        
+        self.model, self.collision_model, self.visual_model = pin.buildModelsFromUrdf(
+            urdf_path, mesh_dirs
+        )
+        
+        # Reset data structures
+        self.data = self.model.createData()
+        self.geom_data = None
+        self.trajectory_spheres.clear()
+        
+        # print("✓ Trajectory spheres cleaned (model reloaded)")
     
     def is_in_collision(self, q: np.ndarray) -> bool:
         """
@@ -267,14 +284,39 @@ class CollisionTester:
         except Exception as e:
             print(f"⚠️  Viewer error: {e}")
 
-
+    def in_collision(self, q: np.ndarray, traj: list, radius: float = 0.007, offset: SE3 = None) -> bool:
+        """
+        Check if robot is in collision along a trajectory.
+        
+        Args:
+            q: Robot joint configuration
+            traj: List of SE3 transformations representing the trajectory
+            radius: Sphere radius in meters
+            offset: Optional SE3 transformation for all spheres
+        Returns:
+            True if collision detected, False otherwise
+        """
+        # Clean previous trajectory spheres
+        if len(self.trajectory_spheres) > 0:
+            self.clean()
+        
+        # Add trajectory spheres
+        self.add_trajectory_spheres(traj, radius=radius, offset=offset)
+        
+        # Setup collision pairs
+        self.setup_collision_pairs()
+        
+        # Check for collision
+        return self.is_in_collision(q)
+        
+        
 def main():
     """Main test function."""
     
     print("COLLISION TESTER - Robot Trajectory Collision Detection")
     
     # Initialize tester
-    tester = CollisionTester()
+    tester = Collision()
     
     # Define offset transformation
     offset = SE3(
@@ -282,16 +324,10 @@ def main():
         translation=np.array([0.45, -0.15, 0.05])
     )
     
-    # Add trajectory spheres
-    tester.add_trajectory_spheres(
-        puzzle='C',
-        segment_length=0.01,  # 1cm spacing
-        radius=0.007,         # 7mm radius
-        offset=offset
-    )
-    
-    # Setup collision pairs
-    tester.setup_collision_pairs()
+    # Get trajectory for specific puzzles
+    trajectory_A = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)
+    trajectory_B = RobotTrajectory.get_trajectory_se3('B', segment_length=0.01)
+    # trajectory_C = RobotTrajectory.get_trajectory_se3('C', segment_length=0.01)
     
     # Test configuration
     q = np.array([
@@ -299,17 +335,25 @@ def main():
          0.00000000e+00, -3.28547760e-01, -4.04954404e-01
     ])
 
-    # Simple collision check
-    in_collision = tester.is_in_collision(q)
-    print(f"Robot in collision: {in_collision}")
+    # Test with trajectory A
+    in_collision_A = tester.in_collision(q, trajectory_A, radius=0.007, offset=offset)
+    print(f"✅ Trajectory A: {'COLLISION' if in_collision_A else 'NO COLLISION'}")
 
-    # Detailed collision check
-    num_collisions = tester.check_collisions(q, verbose=True)
+    # Test with trajectory B (clean() is called automatically)
+    in_collision_B = tester.in_collision(q, trajectory_B, radius=0.007, offset=offset)
+    print(f"✅ Trajectory B: {'COLLISION' if in_collision_B else 'NO COLLISION'}")
     
-    # Visualize
+    # Or manually clean and test
+    # tester.clean()
+    # tester.add_trajectory_spheres(trajectory_C, radius=0.007, offset=offset)
+    # tester.setup_collision_pairs()
+    # in_collision_C = tester.is_in_collision(q)
+    
+    # Visualize the last trajectory
+    num_collisions = tester.check_collisions(q, verbose=True)
     tester.visualize(q, wait_for_input=True)
     
-    print(f"\n✅ Test complete: {'COLLISION' if in_collision else 'NO COLLISION'} ({num_collisions} collision pairs)")
+    print(f"\n✅ Test complete")
 
 
 if __name__ == "__main__":
