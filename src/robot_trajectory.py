@@ -204,51 +204,44 @@ class RobotTrajectory:
             
         return ret
     
-    def generate_circle_segment(self, center: np.ndarray, T1: SE3, T2: SE3, 
-                            radius: float, t: float) -> SE3:
-        """
-        Generate a single SE3 transformation along a circular path.
-        
-        Args:
-            center: Center point of the circle (3D numpy array)
-            T1: Starting transformation (SE3 object)
-            T2: Ending transformation (SE3 object)
-            radius: Radius of the circle
-            t: Interpolation parameter [0, 1]
-        
-        Returns:
-            SE3 transformation at position t along the circular path
-        """
-        # Calculate start and end vectors from center
-        start_vec = T1.translation - center
-        end_vec = T2.translation - center
-        
-        # Calculate angle between vectors
-        start_angle = np.arctan2(start_vec[1], start_vec[0])
-        end_angle = np.arctan2(end_vec[1], end_vec[0])
-        
-        # Ensure we take the shorter path
-        if abs(end_angle - start_angle) > np.pi:
-            if end_angle > start_angle:
-                end_angle -= 2 * np.pi
-            else:
-                end_angle += 2 * np.pi
-        
-        # Interpolate angle
-        current_angle = (1 - t) * start_angle + t * end_angle
-        
-        # Calculate position on circle
-        pos = center + np.array([
-            radius * np.cos(current_angle),
-            radius * np.sin(current_angle),
-            0  # Assuming circle is in XY plane, adjust if needed
-        ])
-        
-        # Interpolate rotation
-        rot = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
-        
-        # Create and return transformation
-        return SE3(translation=pos, rotation=rot)
+def generate_circle_segment(self, center: np.ndarray, T1: SE3, T2: SE3, 
+                        radius: float, t: float) -> SE3:
+    """
+    Generate a single SE3 transformation along a circular path rotating about the x-axis.
+    Points move in the Y-Z plane (rotation axis = x).
+    """
+    center = np.array(center)  # accept list or array
+
+    # Calculate start and end vectors from center (relative vectors)
+    start_vec = T1.translation - center
+    end_vec = T2.translation - center
+
+    # Use atan2(z, y) for angles in Y-Z plane (rotation about x-axis)
+    start_angle = np.arctan2(start_vec[2], start_vec[1])
+    end_angle = np.arctan2(end_vec[2], end_vec[1])
+
+    # Ensure we take the shorter path
+    if abs(end_angle - start_angle) > np.pi:
+        if end_angle > start_angle:
+            end_angle -= 2 * np.pi
+        else:
+            end_angle += 2 * np.pi
+
+    # Interpolate angle
+    current_angle = (1 - t) * start_angle + t * end_angle
+
+    # Calculate position on circle in Y-Z plane; X stays as center[0]
+    pos = center + np.array([
+        0.0,
+        radius * np.cos(current_angle),
+        radius * np.sin(current_angle)
+    ])
+
+    # Interpolate rotation (SLERP)
+    rot = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
+
+    return SE3(translation=pos, rotation=rot)
+
 
     def generate_segment(self, T_start: SE3, T_end: SE3, num_points: int = 50) -> list:
         """
