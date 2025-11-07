@@ -1,7 +1,7 @@
 from robot_move import RobotMove
 import homofraphy as hm
 
-our_robot = RobotMove.create("CRS93", soft_home=False)
+our_robot = RobotMove.create("CRS93", soft_home=True)
 
 calibration_file = "/home/nguyexu7/Documents/ROB/ROB_semestralka/src/calibration_positions.yaml"
 imgs, transforms = our_robot.calibration_move(calibration_file)
