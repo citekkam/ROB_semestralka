@@ -220,10 +220,11 @@ class RobotTrajectory:
         # relative vectors from center
         start_vec = T1.translation - center
         end_vec = T2.translation - center
+        print("start, end",start_vec, end_vec)
 
         # Use only Y and Z components (rotate in Y-Z plane about X)
-        s_yz = np.array([start_vec[1], start_vec[2]])
-        e_yz = np.array([end_vec[1], end_vec[2]])
+        s_yz = np.array([start_vec[0], start_vec[2]])
+        e_yz = np.array([end_vec[0], end_vec[2]])
 
         # compute radius in YZ-plane if not provided or invalid
         if radius is None or radius <= 0:
@@ -234,7 +235,7 @@ class RobotTrajectory:
         # angles in Y-Z plane: atan2(z, y) so angle=0 -> +Y axis
         start_angle = np.arctan2(s_yz[1], s_yz[0])
         end_angle = np.arctan2(e_yz[1], e_yz[0])
-
+        print("angles", start_angle, end_angle)
         # choose shortest angular path
         delta = end_angle - start_angle
         if abs(delta) > np.pi:
@@ -247,9 +248,9 @@ class RobotTrajectory:
         current_angle = (1 - t) * start_angle + t * end_angle
 
         # compute Y,Z on circle around center (X fixed to center[0])
-        y = center[1] + radius * np.cos(current_angle)
+        x = center[0] + radius * np.cos(current_angle)
         z = center[2] + radius * np.sin(current_angle)
-        pos = np.array([center[0], y, z])
+        pos = np.array([x, center[1], z])
 
         # rotation interpolation (SLERP) for orientation
         rot = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
@@ -476,7 +477,7 @@ if __name__ == "__main__":
     print("-" * 70)
     
     # Generate trajectory for visualization
-    viz_trajectory = RobotTrajectory.get_trajectory_se3('B', segment_length=0.01)
+    viz_trajectory = RobotTrajectory.get_trajectory_se3('D', segment_length=0.01)
     
     print("Text visualization:")
     visualize_trajectory(viz_trajectory)
