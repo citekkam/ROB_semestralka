@@ -39,7 +39,7 @@ def quarter_circle_center(p1, p2, clockwise=False):
     L = np.linalg.norm(d)
     
     # Perpendicular direction (normal)
-    n = np.array([-d[1], d[0]])
+    n = np.array([-d[1], d[0], 0])
     n = n / np.linalg.norm(n)
     
     # Distance from midpoint to center for a 90° arc
