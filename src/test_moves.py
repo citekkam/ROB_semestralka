@@ -17,10 +17,13 @@ img = our_robot.robot.grab_image()
 
 ids, corners = hm.find_aruco(img)
 
-positions = hm.get_aruco_center(corners, img)
-
 
 puzzle_base = hm.get_puzzle_base(ids, corners, H, img)
+
+show_img = cv2.resize(img, (1200, 800))
+cv2.imshow(f"ArUco", show_img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 print("Position of puzzle base: ", puzzle_base)
 trans = hm.hom2se3(our_robot.robot.fk(our_robot.robot.get_q()))
@@ -31,6 +34,7 @@ print(T)
 
 
 ## ------------------ A puzzle ----------------
+# trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
 # trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
 
 # print("matrices", trajectory, sep = "\n")
@@ -52,11 +56,14 @@ print(T)
 # for i in range(8):
 #     z_rot = z_rot = SE3(rotation = SO3().rz(np.pi * (2*i / 8)))
 #     print(z_rot)
+# for i in range(8):
+#     z_rot = z_rot = SE3(rotation = SO3().rz(np.pi * (2*i / 8)))
+#     print(z_rot)
     
 
 ## ------------------------- B puzzle ---------------
 # TODO fix balet
-# trajectory = our_robot.trajectory.get_trajectory_se3('B', segment_length=0.01)
+trajectory = our_robot.trajectory.get_trajectory_se3('B', segment_length=0.01)
 
 
 # puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)

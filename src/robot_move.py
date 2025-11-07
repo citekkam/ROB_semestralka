@@ -15,6 +15,7 @@ from pathlib import Path
 
 from ctu_crs import CRS93, CRS97
 from homofraphy import CRC_OFF
+from homofraphy import CRC_OFF
 from robot_trajectory import RobotTrajectory
 from se3 import SE3
 from so3 import SO3

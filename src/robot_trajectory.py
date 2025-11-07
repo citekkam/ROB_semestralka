@@ -28,6 +28,32 @@ from trajectory_points import (
 from utils import visualize_trajectory, plot_trajectory_3d
 
 
+def quarter_circle_center(p1, p2, clockwise=False):
+    p1, p2 = np.array(p1), np.array(p2)
+    
+    # Midpoint of the chord
+    m = (p1 + p2) / 2.0
+    
+    # Direction of chord
+    d = p2 - p1
+    L = np.linalg.norm(d)
+    
+    # Perpendicular direction (normal)
+    n = np.array([-d[1], d[0]])
+    n = n / np.linalg.norm(n)
+    
+    # Distance from midpoint to center for a 90° arc
+    h = L / (2 * np.sqrt(2))
+    
+    # Choose orientation (clockwise vs counterclockwise)
+    if clockwise:
+        n = -n
+    
+    # Center
+    c = m + h * n
+    return c
+
+
 class RobotTrajectory:
     """
     A class for robot trajectory generation and management using SE3/SO3.
@@ -50,6 +76,7 @@ class RobotTrajectory:
             self.waypoints = []
         
         self.trajectory = []
+        self.curr_puzzle = puzzle
     
     @staticmethod
     def _load_puzzle_waypoints(puzzle: str) -> list:
@@ -156,15 +183,72 @@ class RobotTrajectory:
         Returns:
             Interpolated transformation (SE3 object)
         """
-        # Interpolate position using linear interpolation
-        p_interp = self.interpolate_position_linear(T1.translation, T2.translation, t)
+        if not (T1.rotation == T2.rotation) and (self.curr_puzzle in ['D', 'E']):
+            # For puzzles D and E, use circular interpolation
+            p1 = T1.translation
+            p2 = T2.translation
+            
+            radius = 0.05  # 5cm radius
+            center = quarter_circle_center(p1, p2)
+            
+            ret = self.generate_circle_segment(center, T1, T2, radius, t)
+        else:
+            # Interpolate position using linear interpolation
+            p_interp = self.interpolate_position_linear(T1.translation, T2.translation, t)
+            
+            # Interpolate rotation using SLERP
+            R_interp = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
         
-        # Interpolate rotation using SLERP
-        R_interp = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
-        
-        # Create interpolated SE3 transformation
-        return SE3(translation=p_interp, rotation=R_interp)
+            ret = SE3(translation=p_interp, rotation=R_interp)
+            
+        return ret
     
+    def generate_circle_segment(self, center: np.ndarray, T1: SE3, T2: SE3, 
+                            radius: float, t: float) -> SE3:
+        """
+        Generate a single SE3 transformation along a circular path.
+        
+        Args:
+            center: Center point of the circle (3D numpy array)
+            T1: Starting transformation (SE3 object)
+            T2: Ending transformation (SE3 object)
+            radius: Radius of the circle
+            t: Interpolation parameter [0, 1]
+        
+        Returns:
+            SE3 transformation at position t along the circular path
+        """
+        # Calculate start and end vectors from center
+        start_vec = T1.translation - center
+        end_vec = T2.translation - center
+        
+        # Calculate angle between vectors
+        start_angle = np.arctan2(start_vec[1], start_vec[0])
+        end_angle = np.arctan2(end_vec[1], end_vec[0])
+        
+        # Ensure we take the shorter path
+        if abs(end_angle - start_angle) > np.pi:
+            if end_angle > start_angle:
+                end_angle -= 2 * np.pi
+            else:
+                end_angle += 2 * np.pi
+        
+        # Interpolate angle
+        current_angle = (1 - t) * start_angle + t * end_angle
+        
+        # Calculate position on circle
+        pos = center + np.array([
+            radius * np.cos(current_angle),
+            radius * np.sin(current_angle),
+            0  # Assuming circle is in XY plane, adjust if needed
+        ])
+        
+        # Interpolate rotation
+        rot = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
+        
+        # Create and return transformation
+        return SE3(translation=pos, rotation=rot)
+
     def generate_segment(self, T_start: SE3, T_end: SE3, num_points: int = 50) -> list:
         """
         Generate a trajectory segment between two poses with fixed point count.
@@ -308,6 +392,7 @@ class RobotTrajectory:
         """
         traj = RobotTrajectory(puzzle=puzzle)
         
+
         if num_points is not None:
             return traj.generate_by_count(num_points)
         else:
