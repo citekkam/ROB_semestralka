@@ -204,43 +204,58 @@ class RobotTrajectory:
             
         return ret
     
-def generate_circle_segment(self, center: np.ndarray, T1: SE3, T2: SE3, 
-                        radius: float, t: float) -> SE3:
-    """
-    Generate a single SE3 transformation along a circular path rotating about the x-axis.
-    Points move in the Y-Z plane (rotation axis = x).
-    """
-    center = np.array(center)  # accept list or array
+    def generate_circle_segment(self, center: np.ndarray, T1: SE3, T2: SE3, 
+                            radius: float, t: float) -> SE3:
+        """
+        Generate a single SE3 transformation along a circular path rotating about the x-axis.
+        Points move in the Y-Z plane (rotation axis = x).
 
-    # Calculate start and end vectors from center (relative vectors)
-    start_vec = T1.translation - center
-    end_vec = T2.translation - center
+        center : 3-element center [x,y,z]
+        T1, T2 : SE3 start/end (only Y,Z used for arc)
+        radius : desired radius in meters (if <=0, radius computed from T1)
+        t      : interpolation parameter in [0,1]
+        """
+        center = np.array(center, dtype=float)
 
-    # Use atan2(z, y) for angles in Y-Z plane (rotation about x-axis)
-    start_angle = np.arctan2(start_vec[2], start_vec[1])
-    end_angle = np.arctan2(end_vec[2], end_vec[1])
+        # relative vectors from center
+        start_vec = T1.translation - center
+        end_vec = T2.translation - center
 
-    # Ensure we take the shorter path
-    if abs(end_angle - start_angle) > np.pi:
-        if end_angle > start_angle:
-            end_angle -= 2 * np.pi
-        else:
-            end_angle += 2 * np.pi
+        # Use only Y and Z components (rotate in Y-Z plane about X)
+        s_yz = np.array([start_vec[1], start_vec[2]])
+        e_yz = np.array([end_vec[1], end_vec[2]])
 
-    # Interpolate angle
-    current_angle = (1 - t) * start_angle + t * end_angle
+        # compute radius in YZ-plane if not provided or invalid
+        if radius is None or radius <= 0:
+            radius = np.linalg.norm(s_yz)
+            if radius == 0:
+                raise ValueError("Cannot determine radius from start point (zero distance in YZ plane).")
 
-    # Calculate position on circle in Y-Z plane; X stays as center[0]
-    pos = center + np.array([
-        0.0,
-        radius * np.cos(current_angle),
-        radius * np.sin(current_angle)
-    ])
+        # angles in Y-Z plane: atan2(z, y) so angle=0 -> +Y axis
+        start_angle = np.arctan2(s_yz[1], s_yz[0])
+        end_angle = np.arctan2(e_yz[1], e_yz[0])
 
-    # Interpolate rotation (SLERP)
-    rot = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
+        # choose shortest angular path
+        delta = end_angle - start_angle
+        if abs(delta) > np.pi:
+            if delta > 0:
+                end_angle -= 2 * np.pi
+            else:
+                end_angle += 2 * np.pi
 
-    return SE3(translation=pos, rotation=rot)
+        # interpolate angle
+        current_angle = (1 - t) * start_angle + t * end_angle
+
+        # compute Y,Z on circle around center (X fixed to center[0])
+        y = center[1] + radius * np.cos(current_angle)
+        z = center[2] + radius * np.sin(current_angle)
+        pos = np.array([center[0], y, z])
+
+        # rotation interpolation (SLERP) for orientation
+        rot = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
+
+        return SE3(translation=pos, rotation=rot)
+
 
 
     def generate_segment(self, T_start: SE3, T_end: SE3, num_points: int = 50) -> list:
