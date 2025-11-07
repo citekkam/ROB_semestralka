@@ -103,9 +103,9 @@ for t in trajectory:
 matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
 
 print("----------------")
-print(matrcies_puzzle, sep = "\n")
+print(*matrcies_puzzle, sep = "\n")
 
-our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
+# our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
 
 

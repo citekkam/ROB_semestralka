@@ -189,8 +189,9 @@ class RobotTrajectory:
             p2 = T2.translation
             
             radius = 0.05  # 5cm radius
-            center = quarter_circle_center(p1, p2)
-            
+            # center = quarter_circle_center(p1, p2)
+            center = [0.035, 0.0, 0.105]
+            print("center : ", center)
             ret = self.generate_circle_segment(center, T1, T2, radius, t)
         else:
             # Interpolate position using linear interpolation
