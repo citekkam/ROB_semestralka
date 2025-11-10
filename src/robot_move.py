@@ -450,6 +450,9 @@ class RobotMove:
 
 
     def go_traj(self, seq : SE3, CRC_OFF) -> bool:
+        if not len(seq) > 0:
+            print("WARN: No trajectory found!")
+            return
         start = seq[0] * SE3(translation = [0,0,-0.03]) * CRC_OFF.inverse()
         self.move_to_pose_T(start.homogeneous())
         self.robot.wait_for_motion_stop()

@@ -1,0 +1,15 @@
+This file is for experimetns:
+ - each of 4 corners, 
+ - 2 agnled base
+ - 4 edge cases
+
+1 - succes
+0 - failure 
+
+A:
+1111
+1
+no more tests needed
+
+B:
+111
