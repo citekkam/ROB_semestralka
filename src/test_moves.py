@@ -89,7 +89,7 @@ our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 # matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
 
 # our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
-
++
 
 ## ------------------------ C puzzle ---------------
 # trajectory = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
