@@ -101,7 +101,7 @@
     <parent link="link3" />
     <child link="link4" />
     <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
-    <axis xyz="0 0 -1" /> 
+    <axis xyz="0 0 1" /> 
      <!-- todo find the issuse -->
     <limit lower="-3.142" upper="3.142" effort="30" velocity="3" />
   </joint>

@@ -238,6 +238,7 @@ class RobotMove:
         # Get current robot position
         current_q = self.robot.get_q()
         
+        
         print(f"Target transformation matrix:")
         print(target_T)
         
@@ -266,6 +267,7 @@ class RobotMove:
             print(f"Moving to configuration {idx} with distance {distance:.4f}")
             print(f"Target joints: {q}")
             self.robot.move_to_q(q)
+            self.collision.visualize(q, wait_for_input=True)
             print("Motion started...")
             self.robot.wait_for_motion_stop()
             print("Motion completed")
