@@ -438,6 +438,7 @@ class RobotTrajectory:
 
         return ret
 
+
 # Example usage
 if __name__ == "__main__":
     """Example usage of RobotTrajectory class with simplified API."""

@@ -419,14 +419,6 @@ class RobotMove:
                 return False
         return True
 
-    def ik_sol_check(self, current_q: np.ndarray, target_T: np.ndarray) -> [bool, int]:
-        ik_solutions = self.robot.ik(target_T)
-        sorted_distances = self.select_shortest_path(current_q, ik_solutions)
-        for idx, distance, _ in sorted_distances:
-            q = ik_solutions[idx]
-            if self.dif_angle_check(current_q, q, np.pi/2) and self.robot.in_limits(q):
-                return True, idx
-        return False, None
 
     def ik_sol_check(self, current_q: np.ndarray, target_T: np.ndarray, seq : list) -> [bool, int]:
         """check if there is an ik solution within range pi/2 from current_q,
@@ -434,6 +426,7 @@ class RobotMove:
             check the collisions
         """
         ik_solutions = self.robot.ik(target_T)
+        
         sorted_distances = self.select_shortest_path(current_q, ik_solutions)
         for idx, distance, _ in sorted_distances:
             q = ik_solutions[idx]
@@ -443,8 +436,11 @@ class RobotMove:
         return False, None
     
     def seq_check (self, current_q: np.ndarray, seq: list, CRC_OFF) -> bool:
+        print("target T : ", seq[0] * CRC_OFF.inverse())
+        print("seq :", *seq, sep="\n")
         for T in seq:
             target_T = T * CRC_OFF.inverse()
+            print("target", target_T)
             # is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous())
             is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous(), seq)
             if not is_valid:
