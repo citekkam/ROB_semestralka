@@ -12,16 +12,4 @@ A:
 no more tests needed
 
 B:
-1110 (No found trajectory) 1 (but really close to touching the puzzle fith arm - 2mm)
-
-0 - arm touching (puzzle towards the robot) 1
-1 (2 mm) 1 0 (touched, puzzle is in direction of expected end effectr position (45 degrees to left)) 1
-
-all fixed by colission detection
-C:
-1111
-11
-0 (no trajectory found if the puzzle is close to robot) 1 1 1
-
-D:
-fucked
+111
