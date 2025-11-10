@@ -436,11 +436,12 @@ class RobotMove:
         return False, None
     
     def seq_check (self, current_q: np.ndarray, seq: list, CRC_OFF) -> bool:
-        print("target T : ", seq[0] * CRC_OFF.inverse())
-        print("seq :", *seq, sep="\n")
+        # print("target T : ", seq[0] * CRC_OFF.inverse())
+        # print("seq :", *seq, sep="\n")
+        # print(seq)
         for T in seq:
-            target_T = T * CRC_OFF.inverse()
-            print("target", target_T)
+            target_T = SE3(translation = [0,0,-0.02]) * T * CRC_OFF.inverse()
+            # print("target", target_T)
             # is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous())
             is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous(), seq)
             if not is_valid:
@@ -455,7 +456,7 @@ class RobotMove:
             # print(z_rot)
             # print(SE3(rotation = puzzle_base.rotation.inverse()))
             seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, z_rot)
-
+            seq.insert(0, seq[0] * SE3(translation = [0,0,-0.03]))
             current_q = self.robot.get_q()
 
             if self.seq_check(current_q, seq, CRC_OFF):
@@ -469,26 +470,21 @@ class RobotMove:
         if seq == None:
             print("WARN: No trajectory found!")
             return
-        start = seq[0] * SE3(translation = [0,0,-0.03]) * CRC_OFF.inverse()
-        self.move_to_pose_T(start.homogeneous())
-        self.robot.wait_for_motion_stop()
 
         for T in seq:
-            e_pos = T * CRC_OFF.inverse()
+            e_pos = SE3(translation = [0,0,-0.0166]) * T * CRC_OFF.inverse()
             print(e_pos)
             self.move_to_pose_T(e_pos.homogeneous())
             self.robot.wait_for_motion_stop()
             
         seq_i = seq[::-1]
         for T in seq_i:
-            e_pos = T * CRC_OFF.inverse()
+            e_pos = SE3(translation = [0,0,-0.0166]) * T * CRC_OFF.inverse()
             print(e_pos)
             self.move_to_pose_T(e_pos.homogeneous())
             self.robot.wait_for_motion_stop()
 
 
-        self.move_to_pose_T(start.homogeneous())
-        self.robot.wait_for_motion_stop()
         self.robot.soft_home()
             
 # # Example usage
