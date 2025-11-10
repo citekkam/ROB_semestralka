@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="crs_a465">
+
+  <link name="world"/>
+
+  <joint name="world_joint" type="fixed">
+    <parent link="world" />
+    <child link="base_link" />
+    <origin xyz="0 0 0" />
+  </joint>
+  
+  <link name="base_link">
+    <visual>
+      <geometry>
+      <mesh filename="meshes/base_estatica.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="grey"><color rgba="0.6 0.6 0.6 1" /></material>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+      <mesh filename="meshes/base_estatica.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+    </collision>
+  </link>
+
+  <joint name="joint1" type="revolute">
+    <parent link="base_link" />
+    <child link="link1" />
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1" /> 
+    <limit lower="-3.054" upper="3.054" effort="50" velocity="2" />
+  </joint>
+
+  <link name="link1">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/codos_por_fuera.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 0.1651" rpy="1.57079632679 0 0"/>
+      <material name="blue"><color rgba="0.2 0.2 0.8 1" /></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="meshes/codos_por_fuera.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 0.1651" rpy="1.57079632679 0 0"/>
+    </collision>
+  </link>
+
+  <joint name="joint2" type="revolute">
+    <parent link="link1" />
+    <child link="link2" />
+    <origin xyz="0 0 0.33" rpy="-1.57079632679 0 0"/>
+    <axis xyz="0 0 -1" /> 
+    <limit lower="-1.571" upper="1.571" effort="50" velocity="2" />
+  </joint>
+
+  <link name="link2">
+    <visual>
+      <geometry>
+      <mesh filename="meshes/brazo1.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="red"><color rgba="0.8 0.2 0.2 1" /></material>
+      <origin xyz="0 0 -0.065" rpy="1.57079632679 0 -1.57079632679"/>
+    </visual>
+    <collision>
+      <geometry>
+      <mesh filename="meshes/brazo1.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 -0.065" rpy="1.57079632679 0 -1.57079632679"/>
+    </collision>
+  </link>
+
+  <joint name="joint3" type="revolute">
+    <parent link="link2" />
+    <child link="link3" />
+    <origin xyz="0 -0.305 0" />
+    <axis xyz="0 0 -1" /> 
+    <limit lower="-1.919" upper="1.919" effort="50" velocity="2" />
+  </joint>
+
+  <link name="link3">
+    <visual>
+      <geometry>
+      <mesh filename="meshes/anexo_brazo2.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 -0.05" rpy="1.57079632679 0 -1.57079632679"/>
+      <material name="green"><color rgba="0.2 0.8 0.2 1" /></material>
+    </visual>
+    <collision>
+      <geometry>
+      <mesh filename="meshes/anexo_brazo2.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 -0.05" rpy="1.57079632679 0 -1.57079632679"/>
+    </collision>
+  </link>
+
+  <joint name="joint4" type="revolute">
+    <parent link="link3" />
+    <child link="link4" />
+    <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+    <axis xyz="0 0 -1" /> 
+     <!-- todo find the issuse -->
+    <limit lower="-3.142" upper="3.142" effort="30" velocity="3" />
+  </joint>
+
+
+  <link name="link4">
+    <visual>
+      <geometry>
+      <mesh filename="meshes/brazo2_sin_herramienta.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 0.1016" rpy="1.57079632679 0 0"/>
+      <material name="orange"><color rgba="0.9 0.5 0.2 1" /></material>
+    </visual>
+    <collision>
+      <geometry>
+      <mesh filename="meshes/brazo2_sin_herramienta.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 0.1016" rpy="1.57079632679 0 0"/>
+    </collision>
+  </link>
+
+  <joint name="joint5" type="revolute">
+    <parent link="link4" />
+    <child link="tool_link" />
+    <origin xyz="0 0 0.33" rpy="-1.57079632679 0 0"/>
+    <axis xyz="0 0 -1" /> 
+    <!-- todo find the issuse -->
+    <limit lower="-1.833" upper="1.833" effort="20" velocity="3" />
+  </joint>
+
+  <link name="tool_link">
+    <visual>
+      <geometry>
+      <mesh filename="meshes/union_herramienta.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 -0.026795" rpy="1.57079632679 0 -1.57079632679"/>
+      <material name="black"><color rgba="0.1 0.1 0.1 1" /></material>
+    </visual>
+    <collision>
+      <geometry>
+      <mesh filename="meshes/union_herramienta.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 -0.026795" rpy="1.57079632679 0 -1.57079632679"/>
+    </collision>
+  </link>
+  
+  <joint name="joint6" type="revolute">
+    <parent link="tool_link" />
+    <child link="end_effector" />
+    <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+    <axis xyz="0 0 1" /> 
+     <!-- todo find the issuse -->
+    <limit lower="-3.142" upper="3.142" effort="10" velocity="3" />
+  </joint>
+  
+  <link name="end_effector">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/herramienta.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 0.0755" rpy="-1.57079632679 0 0"/>
+      <material name="silver"><color rgba="0.8 0.8 0.8 1" /></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="meshes/herramienta.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 0.0755" rpy="-1.57079632679 0 0"/>
+    </collision>
+  </link> 
+
+  <joint name="joint7" type="fixed">
+    <parent link="end_effector" />
+    <child link="hoop_adapter_link" />
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  
+  <link name="hoop_adapter_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/CRS_adapter.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0.0775" rpy="3.14159265359 0 1.57079632679"/>
+      <material name="yellow"><color rgba="0.9 0.9 0.2 1" /></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="meshes/CRS_adapter.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0.0775" rpy="3.14159265359 0 1.57079632679"/>
+    </collision>
+  </link>
+
+  <joint name="joint8" type="fixed">
+    <parent link="hoop_adapter_link" />
+    <child link="hoop_link" />
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="hoop_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/Hoop.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0.0855" rpy="3.14159265359 0 1.57079632679"/>
+      <material name="purple"><color rgba="0.6 0.2 0.8 1" /></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="meshes/Hoop.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0.0855" rpy="3.14159265359 0 1.57079632679"/>
+    </collision>
+  </link>
+
+</robot>

@@ -52,7 +52,9 @@ our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
 ## ------------------ A puzzle ----------------
 # trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
+# trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
 
+# print("matrices", trajectory, sep = "\n")
 
 # puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
 # print(puzzle_base)
@@ -68,6 +70,9 @@ our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 # our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
 # center check
+# for i in range(8):
+#     z_rot = z_rot = SE3(rotation = SO3().rz(np.pi * (2*i / 8)))
+#     print(z_rot)
 # for i in range(8):
 #     z_rot = z_rot = SE3(rotation = SO3().rz(np.pi * (2*i / 8)))
 #     print(z_rot)
@@ -96,9 +101,12 @@ our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
 
 # puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
-# print("base", puzzle_base)
+# print(puzzle_base)
 # print("computed", (puzzle_base * trajectory[0]))
 
+# # z_rot = SE3(rotation = SO3().rz(np.pi/2))
+
+# # matrcies_puzzle = our_robot.trajectory.to_puzzle_matrice(puzzle_base, trajectory, z_rot)
 
 # matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
 
