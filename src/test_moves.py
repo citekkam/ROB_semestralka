@@ -32,6 +32,23 @@ print("Forward kinematics: ",trans)
 T = SE3(rotation = SO3().ry(np.pi), translation = puzzle_base.translation)
 print(T)
 
+trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
+# trajectory = our_robot.trajectory.get_trajectory_se3('B', segment_length=0.01)
+# trajectory = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
+# trajectory = our_robot.trajectory.get_trajectory_se3('D', segment_length=0.01)
+
+puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
+print("base", puzzle_base)
+print("computed", (puzzle_base * trajectory[0]))
+
+for t in trajectory:
+    print(t)
+matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
+
+print("----------------")
+print(*matrcies_puzzle, sep = "\n")
+
+our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
 ## ------------------ A puzzle ----------------
 # trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
@@ -91,19 +108,19 @@ print(T)
 
 
 ## ------------------------ D puzzle ---------------
-trajectory = our_robot.trajectory.get_trajectory_se3('D', segment_length=0.01)
+# trajectory = our_robot.trajectory.get_trajectory_se3('D', segment_length=0.01)
 
 
-puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
-print("base", puzzle_base)
-print("computed", (puzzle_base * trajectory[0]))
+# puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
+# print("base", puzzle_base)
+# print("computed", (puzzle_base * trajectory[0]))
 
-for t in trajectory:
-    print(t)
-matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
+# for t in trajectory:
+#     print(t)
+# matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
 
-print("----------------")
-print(*matrcies_puzzle, sep = "\n")
+# print("----------------")
+# print(*matrcies_puzzle, sep = "\n")
 
 # our_robot.go_traj(matrcies_puzzle, hm.CRC_OFF)
 
