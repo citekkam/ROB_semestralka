@@ -420,7 +420,7 @@ if __name__ == "__main__":
     print("-" * 70)
     
     # Generate trajectory for visualization
-    viz_trajectory = RobotTrajectory.get_trajectory_se3('D', segment_length=0.01)
+    viz_trajectory = RobotTrajectory.get_trajectory_se3('E', segment_length=0.01)
     
     print("Text visualization:")
     visualize_trajectory(viz_trajectory)

@@ -205,7 +205,7 @@ class Collision:
             
             if self.geom_data.collisionResults[k].isCollision():
                 print(f"IN COLLISION: {g1} ↔ {g2}")
-                # self.visualize(q, wait_for_input=True)
+                self.visualize(q, wait_for_input=True)
                 return True
         
         return False

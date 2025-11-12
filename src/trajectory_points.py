@@ -69,9 +69,9 @@ PUZZLE_D_POINT_6 = SE3(translation=np.array([0.0, 0.0, 0.01]), rotation=ROTATION
 # ========== PUZZLE E TRAJECTORY ==========
 # Define trajectory points for Puzzle E as SE3 objects (global constants)
 # TODO: Define your Puzzle E points here
-PUZZLE_E_POINT_1 = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=ROTATION * SO3().rx(np.pi/2))
-PUZZLE_E_POINT_2 = SE3(translation=np.array([0.0327, 0.05, 0.16]), rotation=ROTATION * SO3().rx(np.pi/2))
-PUZZLE_E_POINT_3 = SE3(translation=np.array([-0.0173, 0.0, 0.16]), rotation=ROTATION * SO3().rx(np.pi/2))
+PUZZLE_E_POINT_1 = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=ROTATION * SO3().rx(-np.pi/2))
+PUZZLE_E_POINT_2 = SE3(translation=np.array([0.0327, 0.05, 0.16]), rotation=ROTATION * SO3().rx(-np.pi/2))
+PUZZLE_E_POINT_3 = SE3(translation=np.array([-0.0173, 0.0, 0.16]), rotation=ROTATION * SO3().rx(-np.pi/2))
 PUZZLE_E_POINT_4 = SE3(translation=np.array([-0.0173, -0.05, 0.11]), rotation=ROTATION)
 PUZZLE_E_POINT_5 = SE3(translation=np.array([-0.0173, 0.0, 0.06]), rotation=ROTATION)
 PUZZLE_E_POINT_6 = SE3(translation=np.array([0.0, 0.0, 0.03]), rotation=ROTATION)
