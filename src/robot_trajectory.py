@@ -28,30 +28,6 @@ from trajectory_points import (
 from utils import visualize_trajectory, plot_trajectory_3d
 
 
-def quarter_circle_center(p1, p2, clockwise=False):
-    p1, p2 = np.array(p1), np.array(p2)
-    
-    # Midpoint of the chord
-    m = (p1 + p2) / 2.0
-    
-    # Direction of chord
-    d = p2 - p1
-    L = np.linalg.norm(d)
-    
-    # Perpendicular direction (normal)
-    n = np.array([-d[1], d[0], 0])
-    n = n / np.linalg.norm(n)
-    
-    # Distance from midpoint to center for a 90° arc
-    h = L / (2 * np.sqrt(2))
-    
-    # Choose orientation (clockwise vs counterclockwise)
-    if clockwise:
-        n = -n
-    
-    # Center
-    c = m + h * n
-    return c
 
 
 class RobotTrajectory:
@@ -178,8 +154,8 @@ class RobotTrajectory:
         Interpolate between two SE3 transformations.
         
         Args:
-            T1: Starting transformation (SE3 object)
-            T2: Ending transformation (SE3 object)
+            T1: Ending transformation (SE3 object)
+            T2: Starting transformation (SE3 object)
             t: Interpolation parameter [0, 1]
         
         Returns:
@@ -189,10 +165,8 @@ class RobotTrajectory:
             # For puzzles D and E, use circular interpolation
             p1 = T1.translation
             p2 = T2.translation
-            
-            radius = 0.05  # 5cm radius
-            # center = quarter_circle_center(p1, p2)
-            center = [0.035, 0.0, 0.105]
+            radius = 0.05  # 5cm radius for both D and E
+            center = p1- [0,0,radius]
             ret = self.generate_circle_segment(center, T1, T2, radius, t)
         else:
             # Interpolate position using linear interpolation
@@ -218,43 +192,14 @@ class RobotTrajectory:
         """
         center = np.array(center, dtype=float)
 
-        # relative vectors from center
-        start_vec = T1.translation - center
-        end_vec = T2.translation - center
+        T_center = SE3(translation=center)
+        if self.curr_puzzle == "D":
+            rot = SE3(rotation=SO3().ry(-(t) * np.pi/2))
+        elif self.curr_puzzle == "E":
+            rot = SE3(rotation=SO3().rx((t) * np.pi/2))
 
-        # Use only Y and Z components (rotate in Y-Z plane about X)
-        s_yz = np.array([start_vec[0], start_vec[2]])
-        e_yz = np.array([end_vec[0], end_vec[2]])
-
-        # compute radius in YZ-plane if not provided or invalid
-        if radius is None or radius <= 0:
-            radius = np.linalg.norm(s_yz)
-            if radius == 0:
-                raise ValueError("Cannot determine radius from start point (zero distance in YZ plane).")
-
-        # angles in Y-Z plane: atan2(z, y) so angle=0 -> +Y axis
-        start_angle = np.arctan2(s_yz[1], s_yz[0])
-        end_angle = np.arctan2(e_yz[1], e_yz[0])
-        # choose shortest angular path
-        delta = end_angle - start_angle
-        if abs(delta) > np.pi:
-            if delta > 0:
-                end_angle -= 2 * np.pi
-            else:
-                end_angle += 2 * np.pi
-
-        # interpolate angle
-        current_angle = (1 - t) * start_angle + t * end_angle
-
-        # compute Y,Z on circle around center (X fixed to center[0])
-        x = center[0] + radius * np.cos(current_angle)
-        z = center[2] + radius * np.sin(current_angle)
-        pos = np.array([x, center[1], z])
-
-        # rotation interpolation (SLERP) for orientation
-        rot = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
-
-        return SE3(translation=pos, rotation=rot)
+        res = T_center * rot * T_center.inverse()  * T1
+        return res
 
 
 
@@ -480,7 +425,7 @@ if __name__ == "__main__":
     print("-" * 70)
     
     # Generate trajectory for visualization
-    viz_trajectory = RobotTrajectory.get_trajectory_se3('D', segment_length=0.01)
+    viz_trajectory = RobotTrajectory.get_trajectory_se3('E', segment_length=0.01)
     
     print("Text visualization:")
     visualize_trajectory(viz_trajectory)
