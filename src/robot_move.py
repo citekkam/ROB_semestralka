@@ -489,22 +489,20 @@ class RobotMove:
                 z_rot = SE3(rotation = SO3().rz(angle))
                 seq_segment = self.trajectory.to_puzzle_matrice(puzzle_base, matrices_segment, z_rot)
                 current_q = self.robot.get_q()
-                #FIXME:
-                # print(seq_segment)
-                # if i != 0:
-                #     for k in range(j+2):
-                #         # print(seq_segment[0].translation)
-                #         # aler_segment = self.trajectory.generate_circle_segment(center = seq_segment[0].translation, T1 = new_seq[-1] , T2 = seq_segment[0], radius = 0.135,t = k)
-                #         T1 = new_seq[-1]
-                #         # T_center = SE3(translation=T1.translation)
-                #         t = k/(j+1+2)
-                #         rot = SE3(rotation=SO3().rz((t) * angle))
-                #         # T2 = self.trajectory.to_puzzle_matrice(puzzle_base, [T1], rot)[0]
-                #         T2 = T1 * rot
-                #         print(T1, T2, "\n")
-                #         # aler_segment = T_center * rot * T_center.inverse()  * T1
-                #         seq_segment.insert(k, T2)
-                # print("---------------------------\n", seq_segment)
+                #FIXME: it does not work correctly
+                # We move to new angle and then move back
+                print(seq_segment)
+                if i != 0:
+                    seq_segment.pop(0) ## ?? does this fix it?
+                    for k in range(j+2):
+                        T1 = new_seq[-1]
+                        t = k/(j+1+2)
+                        rot = SE3(rotation=SO3().rz((t) * angle))
+                        T2 = T1 * rot
+                        # print(T1, T2, "\n")
+                        seq_segment.insert(k, T2)
+                ##FIXME: end
+                print("---------------------------\n", seq_segment)
                 if i == 0:
                     seq_segment.insert(0, seq_segment[0] * SE3(translation = [0,0,-0.03]))
                     seq_segment.insert(0, SE3(translation = [0,0,0.04]) * seq_segment[0])
