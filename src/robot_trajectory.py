@@ -76,6 +76,7 @@ class RobotTrajectory:
             self.waypoints = []
         
         self.trajectory = []
+        self.main_points_idx = []
         self.curr_puzzle = puzzle
     
     @staticmethod
@@ -128,6 +129,7 @@ class RobotTrajectory:
         """Clear all waypoints."""
         self.waypoints = []
         self.trajectory = []
+        self.main_points_idx = []
     
     @staticmethod
     def interpolate_position_linear(p1: np.ndarray, p2: np.ndarray, t: float) -> np.ndarray:
@@ -343,6 +345,7 @@ class RobotTrajectory:
             return []
         
         self.trajectory = []
+        self.main_points_idx = [0]
         
         for i in range(len(self.waypoints) - 1):
             segment = self.generate_segment_by_length(
@@ -350,14 +353,15 @@ class RobotTrajectory:
                 self.waypoints[i + 1], 
                 segment_length
             )
-            
+
             # Avoid duplicating points at segment boundaries
             if i > 0:
                 segment = segment[1:]
-            
+
+            self.main_points_idx.append(self.main_points_idx[-1] + len(segment))
             self.trajectory.extend(segment)
-        
-        return self.trajectory
+            
+        return self.trajectory, self.main_points_idx
     
     @classmethod
     def from_puzzle(cls, puzzle: str) -> 'RobotTrajectory':
@@ -369,6 +373,7 @@ class RobotTrajectory:
         
         Returns:
             RobotTrajectory instance with loaded puzzle waypoints
+            main_points_idx initialized to track key waypoints.
         
         Example:
             traj = RobotTrajectory.from_puzzle('B')
@@ -452,21 +457,21 @@ if __name__ == "__main__":
     print("-" * 70)
     
     # Generate trajectory as SE3 objects with segment_length
-    trajectory = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)
-    print(f"✅ Puzzle A: Generated {len(trajectory)} SE3 transformations (1cm spacing)")
+    # trajectory = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)
+    # print(f"✅ Puzzle A: Generated {len(trajectory)} SE3 transformations (1cm spacing)")
     
-    trajectory = RobotTrajectory.get_trajectory_se3('B', segment_length=0.005)
-    print(f"✅ Puzzle B: Generated {len(trajectory)} SE3 transformations (5mm spacing)")
+    # trajectory = RobotTrajectory.get_trajectory_se3('B', segment_length=0.005)
+    # print(f"✅ Puzzle B: Generated {len(trajectory)} SE3 transformations (5mm spacing)")
     
-    # Or use fixed number of points
-    trajectory = RobotTrajectory.get_trajectory_se3('C', num_points=100)
-    print(f"✅ Puzzle C: Generated {len(trajectory)} SE3 transformations (100 points)")
+    # # Or use fixed number of points
+    # trajectory = RobotTrajectory.get_trajectory_se3('C', num_points=100)
+    # print(f"✅ Puzzle C: Generated {len(trajectory)} SE3 transformations (100 points)")
     
-    # Convert to homogeneous matrices
-    matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)
-    print(f"✅ Converted to {len(matrices)} homogeneous matrices (4x4)")
-    print(f"   Example matrix:\n{matrices[0]}")
-    print()
+    # # Convert to homogeneous matrices
+    # matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)
+    # print(f"✅ Converted to {len(matrices)} homogeneous matrices (4x4)")
+    # print(f"   Example matrix:\n{matrices[0]}")
+    # print()
     
     # ========================================================================
     # VISUALIZATION

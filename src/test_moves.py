@@ -34,7 +34,7 @@ print(T)
 
 # trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
 # trajectory = our_robot.trajectory.get_trajectory_se3('B', segment_length=0.01)
-trajectory = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
+trajectory, main_points_idx = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
 # trajectory = our_robot.trajectory.get_trajectory_se3('D', segment_length=0.01)
 
 puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)
@@ -42,7 +42,7 @@ print("base", puzzle_base)
 print("computed", (puzzle_base * trajectory[0]))
 
 
-matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory)
+matrcies_puzzle = our_robot.valid_traj(puzzle_base, trajectory, main_points_idx)
 
 print("----------------")
 # print(*matrcies_puzzle, sep = "\n")

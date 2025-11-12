@@ -448,22 +448,62 @@ class RobotMove:
                 return False
         return True
 
-    def valid_traj(self, puzzle_base : SE3, matrices : list) -> None | list:
-        for i in range(16):
-            angle = np.pi * (2*i / 16)
-            z_rot = SE3(rotation = SO3().rz(angle))
-            # z_rot = SE3(rotation = puzzle_base.rotation.inverse())
-            # print(z_rot)
-            # print(SE3(rotation = puzzle_base.rotation.inverse()))
-            seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, z_rot)
-            seq.insert(0, seq[0] * SE3(translation = [0,0,-0.03]))
-            current_q = self.robot.get_q()
+    # def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
+    #     for i in range(16):
+    #         angle = np.pi * (2*i / 16)
+    #         z_rot = SE3(rotation = SO3().rz(angle))
+    #         # z_rot = SE3(rotation = puzzle_base.rotation.inverse())
+    #         # print(z_rot)
+    #         # print(SE3(rotation = puzzle_base.rotation.inverse()))
+    #         seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, z_rot)
+    #         seq.insert(0, seq[0] * SE3(translation = [0,0,-0.03]))
+    #         current_q = self.robot.get_q()
 
-            if self.seq_check(current_q, seq, CRC_OFF):
-                return seq
+    #         if self.seq_check(current_q, seq, CRC_OFF):
+    #             return seq
 
-        return None
+    #     return None
 
+    def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
+        new_seq = []
+        valid_segments = [False for _ in range(len(main_points_idx)-1)]
+
+        for i in range(len(main_points_idx)-1):
+            start_idx = main_points_idx[i]
+            end_idx = main_points_idx[i+1]
+            
+            matrices_segment = matrices[start_idx:end_idx]
+            valid_segment_found = False
+
+            for j in range(16):
+                angle = np.pi * (2*j / 16)
+                z_rot = SE3(rotation = SO3().rz(angle))
+                seq_segment = self.trajectory.to_puzzle_matrice(puzzle_base, matrices_segment, z_rot)
+                if i == 0:
+                    seq_segment.insert(0, seq_segment[0] * SE3(translation = [0,0,-0.03]))
+                current_q = self.robot.get_q()
+                if self.seq_check(current_q, seq_segment, CRC_OFF):
+                    new_seq.extend(seq_segment)
+                    valid_segment_found = True
+                    valid_segments[i] = True
+                    break
+            if not valid_segment_found:
+                return None  
+        # for i in range(16):
+        #     angle = np.pi * (2*i / 16)
+        #     z_rot = SE3(rotation = SO3().rz(angle))
+        #     # z_rot = SE3(rotation = puzzle_base.rotation.inverse())
+        #     # print(z_rot)
+        #     # print(SE3(rotation = puzzle_base.rotation.inverse()))
+        #     seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, z_rot)
+        #     seq.insert(0, seq[0] * SE3(translation = [0,0,-0.03]))
+        #     current_q = self.robot.get_q()
+
+        #     if self.seq_check(current_q, seq, CRC_OFF):
+        #         return seq
+
+        return new_seq
+    
 
 
     def go_traj(self, seq : SE3, CRC_OFF) -> bool:
