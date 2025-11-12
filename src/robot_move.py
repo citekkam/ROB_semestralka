@@ -267,7 +267,7 @@ class RobotMove:
             print(f"Moving to configuration {idx} with distance {distance:.4f}")
             print(f"Target joints: {q}")
             self.robot.move_to_q(q)
-            self.collision.visualize(q, wait_for_input=True)
+            # self.collision.visualize(q, wait_for_input=True)
             print("Motion started...")
             self.robot.wait_for_motion_stop()
             print("Motion completed")
@@ -431,7 +431,7 @@ class RobotMove:
         for idx, distance, _ in sorted_distances:
             q = ik_solutions[idx]
             # todo collision check
-            if self.dif_angle_check(current_q, q, np.pi/2) and self.robot.in_limits(q) and not self.collision.in_collision(q, seq):
+            if self.dif_angle_check(current_q, q, np.pi) and self.robot.in_limits(q) and not self.collision.in_collision(q, seq):
                 return True, idx
         return False, None
     
