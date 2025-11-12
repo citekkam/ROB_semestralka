@@ -236,6 +236,7 @@ class CRSRobot:
 
     def in_limits(self, q: ArrayLike) -> bool:
         """Return whether the given joint configuration is in joint limits."""
+        # print("Robot joint are not in limits")
         return np.all(q >= self.q_min) and np.all(q <= self.q_max)
 
     @staticmethod

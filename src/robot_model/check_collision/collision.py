@@ -118,6 +118,8 @@ class Collision:
         
         spheres = []
         for i, T in enumerate(trajectory):
+            # if i <= 1:
+            #     continue
             position = T.translation
             sphere_pair = self.add_sphere(
                 position,
@@ -205,9 +207,8 @@ class Collision:
             
             if self.geom_data.collisionResults[k].isCollision():
                 print(f"IN COLLISION: {g1} ↔ {g2}")
-                self.visualize(q, wait_for_input=True)
+                # self.visualize(q, wait_for_input=True)
                 return True
-        
         return False
     
     def check_collisions(self, q: np.ndarray, verbose: bool = True) -> int:

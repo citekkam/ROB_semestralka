@@ -197,6 +197,7 @@ class RobotTrajectory:
             rot = SE3(rotation=SO3().ry(-(t) * np.pi/2))
         elif self.curr_puzzle == "E":
             rot = SE3(rotation=SO3().rx((t) * np.pi/2))
+        
 
         res = T_center * rot * T_center.inverse()  * T1
         return res
