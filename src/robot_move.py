@@ -5,7 +5,7 @@ RobotMove Class
 This class provides methods for robot movement including calibration routines
 and path planning using shortest path selection.
 
-Author: David
+Author: Xuan Dinh Nguyen
 Date: 2025-10-25
 """
 
@@ -261,9 +261,8 @@ class RobotMove:
         failed_captures = 0
         
         for i, (pos_name, target_pose) in enumerate(positions, 1):
-            print(f"{'='*70}")
+
             print(f"Position {i}/{len(positions)}: {pos_name}")
-            print(f"{'='*70}")
             
             # Move to position
             print(f"Moving to position...")
@@ -297,7 +296,7 @@ class RobotMove:
             # Append to arrays
             imgs.append(image)
             transformation_matrices.append(transformation_matrix)
-            print(f"✅ Data added to calibration arrays (entry {len(imgs)})")
+            print(f"Data added to calibration arrays (entry {len(imgs)})")
             successful_captures += 1
             print()
         
@@ -390,10 +389,10 @@ class RobotMove:
 
     def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
         new_seq = []
-        valid_segments = [False for _ in range(len(main_points_idx)-1)]
         coli_seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, SE3())
 
         for i in range(len(main_points_idx)-1):
+            prev_angle_idx = 0
             start_idx = main_points_idx[i]
             end_idx = main_points_idx[i+1]
             
@@ -405,34 +404,28 @@ class RobotMove:
                 z_rot = SE3(rotation = SO3().rz(angle))
                 seq_segment = self.trajectory.to_puzzle_matrice(puzzle_base, matrices_segment, z_rot)
                 current_q = self.robot.get_q()
-
-                #FIXME:
-                # print(seq_segment)
-                # if i != 0:
-                #     for k in range(j+2):
-                #         # print(seq_segment[0].translation)
-                #         # aler_segment = self.trajectory.generate_circle_segment(center = seq_segment[0].translation, T1 = new_seq[-1] , T2 = seq_segment[0], radius = 0.135,t = k)
-                #         T1 = new_seq[-1]
-                #         # T_center = SE3(translation=T1.translation)
-                #         t = k/(j+1+2)
-                #         rot = SE3(rotation=SO3().rz((t) * angle))
-                #         # T2 = self.trajectory.to_puzzle_matrice(puzzle_base, [T1], rot)[0]
-                #         T2 = T1 * rot
-                #         print(T1, T2, "\n")
-                #         # aler_segment = T_center * rot * T_center.inverse()  * T1
-                #         seq_segment.insert(k, T2)
-                # print("---------------------------\n", seq_segment)
-
+                
                 if i == 0:
-                    seq_segment.insert(0, seq_segment[0] * SE3(translation = [0,0,-0.03]))
-                    seq_segment.insert(0, SE3(translation = [0,0,0.04]) * seq_segment[0])
+                    start_point_2 = seq_segment[0] * SE3(translation = [0,0,-0.03])
+                    start_point_1 = SE3(translation = [0,0,0.04]) * start_point_2
+                    
+
                     if not self.seq_check(current_q, seq_segment[:1], CRC_OFF, coli_seq, False):
                         print("Cant get to starting position")
                         continue
+                elif j != prev_angle_idx :
+                    # find the angle change from previous segment with count angle change in 16 steps
+                    diff_angle_idx = abs(prev_angle_idx - j)
+                    T_start = new_seq[-1]
+                    T_end = seq_segment[0]
+                    angle_seq_seg = self.trajectory.generate_segment(T_start, T_end, num_points=diff_angle_idx + 2)
+                    old_seq_seg = seq_segment[1:]
+                    seq_segment = list(angle_seq_seg[1:]) + list(old_seq_seg)
+                #todo seq_segment[1:] nebude fungovat pokud nejsem na zacatku i == 0
                 if self.seq_check(current_q, seq_segment[1:], CRC_OFF, coli_seq ,True):
-                    new_seq.extend(seq_segment)
+                    new_seq.extend(seq_segment[:])
                     valid_segment_found = True
-                    valid_segments[i] = True
+                    prev_angle_idx = j
                     break
             if not valid_segment_found:
                 return None  
