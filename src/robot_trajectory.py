@@ -204,25 +204,30 @@ class RobotTrajectory:
 
 
 
-    def generate_segment(self, T_start: SE3, T_end: SE3, num_points: int = 50) -> list:
-        """
-        Generate a trajectory segment between two poses with fixed point count.
-        
+    @staticmethod
+    def generate_segment(T_start: SE3, T_end: SE3, num_points: int = 50) -> list:
+        """Generate a trajectory segment between two poses (static method).
+
+        Jednoduchá varianta: lineární interpolace pozice + SLERP rotace.
+        Poznámka: Kruhová interpolace pro puzzle D/E se zde NEAPLIKUJE, protože
+        bez instance není dostupný `self.curr_puzzle`. Pokud ji potřebuješ,
+        ponech metodu jako instanční.
+
         Args:
-            T_start: Starting transformation (SE3 object)
-            T_end: Ending transformation (SE3 object)
-            num_points: Number of interpolation points (default: 50)
-        
+            T_start: počáteční SE3 transformace
+            T_end: koncová SE3 transformace
+            num_points: počet bodů segmentu (>=2)
+
         Returns:
-            List of SE3 objects representing the trajectory segment
+            list[SE3] interpolovaných transformací
         """
-        trajectory_segment = []
+        segment = []
         for i in range(num_points):
-            t = i / (num_points - 1) if num_points > 1 else 0
-            T_interp = self.interpolate_transformation(T_start, T_end, t)
-            trajectory_segment.append(T_interp)
-        
-        return trajectory_segment
+            t = i / (num_points - 1) if num_points > 1 else 0.0
+            p = RobotTrajectory.interpolate_position_linear(T_start.translation, T_end.translation, t)
+            r = RobotTrajectory.interpolate_rotation_slerp(T_start.rotation, T_end.rotation, t)
+            segment.append(SE3(translation=p, rotation=r))
+        return segment
     
     def generate_segment_by_length(self, T_start: SE3, T_end: SE3, 
                                    segment_length: float = 0.01) -> list:
@@ -262,10 +267,10 @@ class RobotTrajectory:
         self.trajectory = []
         
         for i in range(len(self.waypoints) - 1):
-            segment = self.generate_segment(
-                self.waypoints[i], 
-                self.waypoints[i + 1], 
-                num_points_per_segment
+            segment = RobotTrajectory.generate_segment(
+                self.waypoints[i],
+                self.waypoints[i + 1],
+                num_points_per_segment,
             )
             
             # Avoid duplicating points at segment boundaries
@@ -295,9 +300,9 @@ class RobotTrajectory:
         
         for i in range(len(self.waypoints) - 1):
             segment = self.generate_segment_by_length(
-                self.waypoints[i], 
-                self.waypoints[i + 1], 
-                segment_length
+                self.waypoints[i],
+                self.waypoints[i + 1],
+                segment_length,
             )
 
             # Avoid duplicating points at segment boundaries
@@ -426,14 +431,21 @@ if __name__ == "__main__":
     print("-" * 70)
     
     # Generate trajectory for visualization
-    viz_trajectory = RobotTrajectory.get_trajectory_se3('E', segment_length=0.01)
+    viz_trajectory, main_idx = RobotTrajectory.get_trajectory_se3('E', segment_length=0.01)
+
+    T_start = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=SO3().rz(-np.pi/2))
+    T_end = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=SO3().rz(np.pi/2))
+
+    # Správné statické volání:
+    test_traj = RobotTrajectory.generate_segment(T_start, T_end, num_points=16)
+
     
     print("Text visualization:")
-    visualize_trajectory(viz_trajectory)
+    visualize_trajectory(test_traj)
     
     print("\n3D plot visualization (close window to continue)...")
     try:
-        plot_trajectory_3d(viz_trajectory)
+        plot_trajectory_3d(test_traj)
     except ImportError:
         print("⚠️  Matplotlib not available. Install: pip install matplotlib")
     except Exception as e:
