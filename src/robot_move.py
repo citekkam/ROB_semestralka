@@ -332,7 +332,6 @@ class RobotMove:
         return positions
 
     def dif_angle_check(self, current_q : np.ndarray, target_q : np.ndarray, rng : float) -> bool:
-        # print(current_q[-1])
         print(current_q)
         # if current_q[-1] > 0.1:
         #     input()
