@@ -25,20 +25,25 @@ cv2.imshow(f"ArUco", show_img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-print("Position of puzzle base: ", puzzle_base)
-trans = hm.hom2se3(our_robot.robot.fk(our_robot.robot.get_q()))
-print("Forward kinematics: ",trans)
+# print("Position of puzzle base: ", puzzle_base)
+# trans = hm.hom2se3(our_robot.robot.fk(our_robot.robot.get_q()))
+# print("Forward kinematics: ",trans)
 
-T = SE3(rotation = SO3().ry(np.pi), translation = puzzle_base.translation)
-print(T)
+# T = SE3(rotation = SO3().ry(np.pi), translation = puzzle_base.translation)
+# print(T)
 
 # trajectory = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
 # trajectory = our_robot.trajectory.get_trajectory_se3('B', segment_length=0.01)
 
 # trajectory, main_points_idx = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
-trajectory, main_points_idx = our_robot.trajectory.get_trajectory_se3('D', segment_length=0.01)
+trajectory, main_points_idx = our_robot.trajectory.get_trajectory_se3('C', segment_length=0.01)
+# trajectory, main_points_idx = our_robot.trajectory.get_trajectory_se3('A', segment_length=0.1)
+trajectory, main_points_idx = our_robot.trajectory.get_trajectory_se3('B', segment_length=0.01)
+trajectory, main_points_idx = our_robot.trajectory.get_trajectory_se3('D', segment_length=0.005)
 
-# trajectory, main_points_idx = our_robot.trajectory.get_trajectory_se3('E', segment_length=0.01)
+trajectory, main_points_idx = our_robot.trajectory.get_trajectory_se3('E', segment_length=0.005)
+
+
 # trajectory = our_robot.trajectory.get_trajectory_se3('E', segment_length=0.01)
 
 puzzle_base = SE3(rotation = puzzle_base.rotation, translation = puzzle_base.translation)

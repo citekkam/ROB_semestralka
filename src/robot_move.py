@@ -38,6 +38,7 @@ class RobotMove:
         self.trajectory = RobotTrajectory
         self.joint_weights = joint_weights if joint_weights is not None else np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
         self.collision = Collision()
+        self.current_q = self.robot.get_q()
     
     @classmethod
     def create(cls, robot_type: str = "CRS93", soft_home: bool = False, 
@@ -329,46 +330,78 @@ class RobotMove:
         return positions
 
     def dif_angle_check(self, current_q : np.ndarray, target_q : np.ndarray, rng : float) -> bool:
+        # print(current_q[-1])
+        print(current_q)
+        # if current_q[-1] > 0.1:
+        #     input()
         for i in range(len(current_q)):
             diff = abs(current_q[i] - target_q[i])
-            if diff > rng:
-                print("Angle issue")
-                return False
+            if i == len(current_q) or i == 3:
+                print(diff)
+                if diff > rng / 2:
+                    print("Angle issue in EE")
+                    return False
+            else:
+                if diff > rng:
+                    print("Angle issue")
+                    return False
         return True
 
 
+<<<<<<< HEAD
     def ik_sol_check(self, current_q: np.ndarray, target_T: np.ndarray, seq : list, coli_seq : list, check_angle = True, prev_q) -> [bool, int]:
+=======
+    def ik_sol_check(self, target_T: np.ndarray, seq : list, coli_seq : list, check_angle = True) -> [bool, int]:
+>>>>>>> test_branch
         """check if there is an ik solution within range pi/2 from current_q,
             check if it is within robot limits and
             check the collisions
         """
         ik_solutions = self.robot.ik(target_T)
         
-        sorted_distances = self.select_shortest_path(current_q, ik_solutions)
+        sorted_distances = self.select_shortest_path(self.current_q, ik_solutions)
         for idx, distance, _ in sorted_distances:
             q = ik_solutions[idx]
             # todo collision check
             if check_angle:
+<<<<<<< HEAD
                 if self.dif_angle_check(current_q, q, np.pi* 2/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     prev_q = q
+=======
+                if self.dif_angle_check(self.current_q, q, np.pi * 5/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
+                    self.current_q = q
+>>>>>>> test_branch
                     return True, idx
             else:
                 print("checking start")
                 if self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
+<<<<<<< HEAD
                     prev_q = q
+=======
+                    self.current_q = q
+>>>>>>> test_branch
                     print("Robot not in limits or collision")
                     return True, idx
         return False, None
     
-    def seq_check (self, current_q: np.ndarray, seq: list, CRC_OFF, coli_seq, check_angle = True) -> bool:
+    def seq_check (self, seq: list, CRC_OFF, coli_seq, check_angle = True) -> bool:
         # print("target T : ", seq[0] * CRC_OFF.inverse())
         # print("seq :", *seq, sep="\n")
         # print(seq)
+<<<<<<< HEAD
         prev_q = current_q
         for T in seq:
             target_T = SE3(translation = [0,0,-0.02]) * T * CRC_OFF.inverse()
             # is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous())
             is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous(), seq, coli_seq, check_angle, prev_q)
+=======
+        
+
+        for T in seq:
+            target_T = SE3(translation = [0,0,-0.02]) * T * CRC_OFF.inverse()
+            # is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous())
+            is_valid, idx = self.ik_sol_check(target_T.homogeneous(), seq, coli_seq, check_angle)
+>>>>>>> test_branch
             if not is_valid:
                 print("Cant get to :", target_T)
                 return False
@@ -393,7 +426,8 @@ class RobotMove:
     def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
         new_seq = []
         coli_seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, SE3())
-
+        self.current_q = self.robot.get_q()
+        prev_angle = 0
         for i in range(len(main_points_idx)-1):
             prev_angle_idx = 0
             start_idx = main_points_idx[i]
@@ -403,10 +437,9 @@ class RobotMove:
             valid_segment_found = False
 
             for j in range(16):
-                angle = np.pi * (2*j / 16)
+                angle = prev_angle + np.pi * (2*j / 16)
                 z_rot = SE3(rotation = SO3().rz(angle))
                 seq_segment = self.trajectory.to_puzzle_matrice(puzzle_base, matrices_segment, z_rot)
-                current_q = self.robot.get_q()
                 
                 if i == 0:
                     start_point_2 = seq_segment[0] * SE3(translation = [0,0,-0.03])
@@ -414,22 +447,23 @@ class RobotMove:
                     seq_segment.insert(0, start_point_1)
                     seq_segment.insert(1, start_point_2)
 
-                    if not self.seq_check(current_q, seq_segment[:1], CRC_OFF, coli_seq, False):
+                    if not self.seq_check(seq_segment[:2], CRC_OFF, coli_seq, False):
                         print("Cant get to starting position")
                         continue
-                elif j != prev_angle_idx :
+                elif angle != prev_angle :
                     # find the angle change from previous segment with count angle change in 16 steps
-                    diff_angle_idx = abs(prev_angle_idx - j)
+                    diff_angle_idx = j
                     T_start = new_seq[-1]
                     T_end = seq_segment[0]
                     angle_seq_seg = self.trajectory.generate_segment(T_start, T_end, num_points=diff_angle_idx + 2)
                     old_seq_seg = seq_segment[1:]
                     seq_segment = list(angle_seq_seg[1:]) + list(old_seq_seg)
                 #todo seq_segment[1:] nebude fungovat pokud nejsem na zacatku i == 0
-                if self.seq_check(current_q, seq_segment[1:], CRC_OFF, coli_seq ,True):
+                start_idx = 2 if i == 0 else 0
+                if self.seq_check(seq_segment[start_idx:], CRC_OFF, coli_seq ,True):
                     new_seq.extend(seq_segment[:])
                     valid_segment_found = True
-                    prev_angle_idx = j
+                    prev_angle = angle
                     break
             if not valid_segment_found:
                 return None  
