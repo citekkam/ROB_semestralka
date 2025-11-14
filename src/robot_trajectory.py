@@ -5,7 +5,7 @@ RobotTrajectory Class
 This class provides trajectory generation and management using SE3 transformations
 with SO3 rotations and interpolation methods.
 
-Author: David
+Author: Xuan Dinh Nguyen
 Date: 2025-10-25
 """
 
@@ -149,7 +149,8 @@ class RobotTrajectory:
         
         return R_interp
     
-    def interpolate_transformation(self, T1: SE3, T2: SE3, t: float) -> SE3:
+    @staticmethod
+    def interpolate_transformation(T1: SE3, T2: SE3, t: float, puzzle: str | None = None) -> SE3:
         """
         Interpolate between two SE3 transformations.
         
@@ -157,30 +158,32 @@ class RobotTrajectory:
             T1: Ending transformation (SE3 object)
             T2: Starting transformation (SE3 object)
             t: Interpolation parameter [0, 1]
+            puzzle: Optional puzzle id ('D' or 'E') to enable circular interpolation
         
         Returns:
             Interpolated transformation (SE3 object)
         """
-        if not (T1.rotation == T2.rotation) and (self.curr_puzzle in ['D', 'E']):
+        if not (T1.rotation == T2.rotation) and (puzzle in ['D', 'E']):
             # For puzzles D and E, use circular interpolation
             p1 = T1.translation
             p2 = T2.translation
             radius = 0.05  # 5cm radius for both D and E
             center = p1- [0,0,radius]
-            ret = self.generate_circle_segment(center, T1, T2, radius, t)
+            ret = RobotTrajectory.generate_circle_segment(center, T1, T2, radius, t, puzzle=puzzle)
         else:
             # Interpolate position using linear interpolation
-            p_interp = self.interpolate_position_linear(T1.translation, T2.translation, t)
+            p_interp = RobotTrajectory.interpolate_position_linear(T1.translation, T2.translation, t)
             
             # Interpolate rotation using SLERP
-            R_interp = self.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
+            R_interp = RobotTrajectory.interpolate_rotation_slerp(T1.rotation, T2.rotation, t)
         
             ret = SE3(translation=p_interp, rotation=R_interp)
             
         return ret
     
-    def generate_circle_segment(self, center: np.ndarray, T1: SE3, T2: SE3, 
-                            radius: float, t: float) -> SE3:
+    @staticmethod
+    def generate_circle_segment(center: np.ndarray, T1: SE3, T2: SE3, 
+                            radius: float, t: float, puzzle: str | None = None) -> SE3:
         """
         Generate a single SE3 transformation along a circular path rotating about the x-axis.
         Points move in the Y-Z plane (rotation axis = x).
@@ -193,10 +196,13 @@ class RobotTrajectory:
         center = np.array(center, dtype=float)
 
         T_center = SE3(translation=center)
-        if self.curr_puzzle == "D":
+        if puzzle == "D":
             rot = SE3(rotation=SO3().ry(-(t) * np.pi/2))
-        elif self.curr_puzzle == "E":
+        elif puzzle == "E":
             rot = SE3(rotation=SO3().rx((t) * np.pi/2))
+        else:
+            # Fallback: no circular motion if puzzle not specified; return linear pose
+            rot = SE3()
         
 
         res = T_center * rot * T_center.inverse()  * T1
@@ -204,24 +210,27 @@ class RobotTrajectory:
 
 
 
-    def generate_segment(self, T_start: SE3, T_end: SE3, num_points: int = 50) -> list:
-        """
-        Generate a trajectory segment between two poses with fixed point count.
-        
+    @staticmethod
+    def generate_segment(T_start: SE3, T_end: SE3, num_points: int = 50, puzzle: str | None = None) -> list:
+        """Generate a trajectory segment between two poses (static method).
+
+        Využívá jednotné rozhraní `interpolate_transformation`, aby se zachovala
+        lineární/slerp interpolace i kruhová interpolace pro puzzle D/E.
+
         Args:
-            T_start: Starting transformation (SE3 object)
-            T_end: Ending transformation (SE3 object)
-            num_points: Number of interpolation points (default: 50)
-        
+            T_start: počáteční SE3 transformace
+            T_end: koncová SE3 transformace
+            num_points: počet bodů segmentu (>=2)
+            puzzle: volitelně identifikátor puzzle (např. 'D' nebo 'E')
+
         Returns:
-            List of SE3 objects representing the trajectory segment
+            list[SE3] interpolovaných transformací
         """
         trajectory_segment = []
         for i in range(num_points):
-            t = i / (num_points - 1) if num_points > 1 else 0
-            T_interp = self.interpolate_transformation(T_start, T_end, t)
+            t = i / (num_points - 1) if num_points > 1 else 0.0
+            T_interp = RobotTrajectory.interpolate_transformation(T_start, T_end, t, puzzle=puzzle)
             trajectory_segment.append(T_interp)
-        
         return trajectory_segment
     
     def generate_segment_by_length(self, T_start: SE3, T_end: SE3, 
@@ -243,7 +252,7 @@ class RobotTrajectory:
         # Calculate number of points based on segment length
         num_points = max(2, int(np.ceil(distance / segment_length)) + 1)
         
-        return self.generate_segment(T_start, T_end, num_points)
+        return self.generate_segment(T_start, T_end, num_points, puzzle=self.curr_puzzle)
     
     def generate_by_count(self, num_points_per_segment: int = 50) -> list:
         """
@@ -262,10 +271,11 @@ class RobotTrajectory:
         self.trajectory = []
         
         for i in range(len(self.waypoints) - 1):
-            segment = self.generate_segment(
-                self.waypoints[i], 
-                self.waypoints[i + 1], 
-                num_points_per_segment
+            segment = RobotTrajectory.generate_segment(
+                self.waypoints[i],
+                self.waypoints[i + 1],
+                num_points_per_segment,
+                puzzle=self.curr_puzzle,
             )
             
             # Avoid duplicating points at segment boundaries
@@ -287,7 +297,7 @@ class RobotTrajectory:
             List of SE3 objects representing the full trajectory
         """
         if len(self.waypoints) < 2:
-            print("⚠️  Need at least 2 waypoints to generate trajectory")
+            print("Need at least 2 waypoints to generate trajectory")
             return []
         
         self.trajectory = []
@@ -295,9 +305,9 @@ class RobotTrajectory:
         
         for i in range(len(self.waypoints) - 1):
             segment = self.generate_segment_by_length(
-                self.waypoints[i], 
-                self.waypoints[i + 1], 
-                segment_length
+                self.waypoints[i],
+                self.waypoints[i + 1],
+                segment_length,
             )
 
             # Avoid duplicating points at segment boundaries
@@ -329,7 +339,6 @@ class RobotTrajectory:
     
     # ========================================================================
     # SIMPLIFIED STATIC METHOD - ONE-CALL GENERATION
-    # ========================================================================
     
     @staticmethod
     def get_trajectory_se3(puzzle: str, segment_length: float = 0.01,
@@ -426,36 +435,40 @@ if __name__ == "__main__":
     print("-" * 70)
     
     # Generate trajectory for visualization
-    viz_trajectory = RobotTrajectory.get_trajectory_se3('E', segment_length=0.01)
-    
+    viz_trajectory, main_idx = RobotTrajectory.get_trajectory_se3('E', segment_length=0.01)
+
+    T_start = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=SO3().rz(-np.pi/2))
+    T_end = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=SO3().rz(np.pi/2))
+
+    # Správné statické volání:
+    test_traj = RobotTrajectory.generate_segment(T_start, T_end, num_points=16)
+
+    start_1 = viz_trajectory[0] * SE3(translation = [0,0,0.04])
+    start_1 = viz_trajectory[0] * SE3(translation = [0,0,0.04],  rotation=SO3().rx(np.pi*1/4))
+    end_1 =  start_1 * SE3(translation = [0,0,0.07])
+    start_seq_1 = RobotTrajectory.generate_segment(end_1, start_1, num_points=20)
+    start_2 = start_1 * SE3(translation = [0,0,0.07], rotation=SO3().rx(np.pi*1/4))
+    end_2 = start_2 * SE3(translation = [0,0,0.05])
+    start_seq_2 = RobotTrajectory.generate_segment(end_2, start_2, num_points=20)
+
+    # btw_seq_1_start = RobotTrajectory.generate_segment(start_1, viz_trajectory[0], num_points=10)
+    # btw_seq_1_2 = RobotTrajectory.generate_segment(start_1, start_2, num_points=10)
+    btw_seq_2_end = RobotTrajectory.generate_segment(start_2, end_1, num_points=10)
+
+    start = start_seq_2 + btw_seq_2_end + start_seq_1
+    # start = test_traj + start_seq_1 + start_seq_2
+
+    # Prepend the starting pose. list.insert mutates in-place and returns None, so call it separately.
+    # start.insert(0, T_start)
+
     print("Text visualization:")
-    visualize_trajectory(viz_trajectory)
-    
+    # visualize_trajectory(start)
+    visualize_trajectory(start + viz_trajectory)
+
     print("\n3D plot visualization (close window to continue)...")
     try:
-        plot_trajectory_3d(viz_trajectory)
+        plot_trajectory_3d(start + viz_trajectory)
     except ImportError:
         print("⚠️  Matplotlib not available. Install: pip install matplotlib")
     except Exception as e:
         print(f"⚠️  Could not create plot: {e}")
-    
-    # ========================================================================
-    # QUICK REFERENCE
-    # ========================================================================
-    print("\n" + "=" * 70)
-    print("⚡ QUICK REFERENCE")
-    print("=" * 70)
-    print("# Generate trajectory in one line:")
-    print("trajectory = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)")
-    print("trajectory = RobotTrajectory.get_trajectory_se3('B', num_points=100)")
-    print()
-    print("# Convert to homogeneous matrices:")
-    print("matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)")
-    print()
-    print("# Visualize:")
-    print("from utils import visualize_trajectory, plot_trajectory_3d")
-    print("visualize_trajectory(trajectory)  # Text output")
-    print("plot_trajectory_3d(trajectory)    # 3D plot")
-    print()
-    print("Available puzzles: A, B, C, D, E")
-    print("=" * 70)

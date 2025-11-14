@@ -5,7 +5,7 @@ RobotMove Class
 This class provides methods for robot movement including calibration routines
 and path planning using shortest path selection.
 
-Author: David
+Author: Xuan Dinh Nguyen
 Date: 2025-10-25
 """
 
@@ -14,7 +14,6 @@ import yaml
 from pathlib import Path
 
 from ctu_crs import CRS93, CRS97
-from homofraphy import CRC_OFF
 from homofraphy import CRC_OFF
 from robot_trajectory import RobotTrajectory
 from se3 import SE3
@@ -115,9 +114,6 @@ class RobotMove:
             
             distances.append((i, dist, normalized_diff))
 
-            if debug:
-                print(f"Configuration {i}: distance = {dist:.6f} rad")
-                print(f"  Δq = {normalized_diff}")
         # Sort by distance (ascending)
         sorted_distances = sorted(distances, key=lambda x: x[1])
         return sorted_distances
@@ -170,60 +166,6 @@ class RobotMove:
         
         return transform.homogeneous()
     
-    def move_to_pose(self, target_pose: np.ndarray, check_limits: bool = True) -> bool:
-        """
-        Move robot to target pose using IK and shortest path selection.
-        
-        Args:
-            target_pose: Target pose [x, y, z, roll, pitch, yaw]
-            check_limits: Whether to check robot limits before moving
-        
-        Returns:
-            bool: True if movement successful, False otherwise
-        """
-        # Get current robot position
-        current_q = self.robot.get_q()
-        
-        # Convert pose to transformation matrix
-        target_T = self._pose_to_transformation_matrix(target_pose)
-        
-        print(f"Target transformation matrix:")
-        print(target_T)
-        print(f"Target pose [x,y,z,r,p,y]: {target_pose}")
-        
-        # Get all IK solutions
-        ik_solutions = self.robot.ik(target_T)
-        
-        if len(ik_solutions) == 0:
-            print(f"⚠️  No IK solutions found for target pose")
-            return False
-        
-        print(f"Found {len(ik_solutions)} IK solutions")
-        
-        # Find shortest path
-        sorted_distances = self.select_shortest_path(current_q, ik_solutions)
-        
-        # Try each solution in order of distance
-        for idx, distance, _ in sorted_distances:
-            q = ik_solutions[idx]
-            
-            # Check robot limits if requested
-            if check_limits and not self.robot.in_limits(q):
-                print(f"Configuration {idx} exceeds robot limits, trying next...")
-                continue
-            
-            # Move to position
-            print(f"Moving to configuration {idx} with distance {distance:.4f}")
-            print(f"Target joints: {q}")
-            self.robot.move_to_q(q)
-            print("Motion started...")
-            self.robot.wait_for_motion_stop()
-            print("Motion completed")
-            return True
-        
-        print("❌ No valid configuration found within robot limits")
-        return False
-    
     def move_to_pose_T(self, target_T: np.ndarray, check_limits: bool = True) -> bool:
         """
         Move robot to target transformation matrix using IK and shortest path selection.
@@ -238,10 +180,6 @@ class RobotMove:
         # Get current robot position
         current_q = self.robot.get_q()
         
-        
-        print(f"Target transformation matrix:")
-        print(target_T)
-        
         # Get all IK solutions
         ik_solutions = self.robot.ik(target_T)
         
@@ -249,7 +187,7 @@ class RobotMove:
             print(f"⚠️  No IK solutions found for target transformation")
             return False
         
-        print(f"Found {len(ik_solutions)} IK solutions")
+        # print(f"Found {len(ik_solutions)} IK solutions")
         
         # Find shortest path
         sorted_distances = self.select_shortest_path(current_q, ik_solutions)
@@ -260,17 +198,13 @@ class RobotMove:
             
             # Check robot limits if requested
             if check_limits and not self.robot.in_limits(q):
-                print(f"Configuration {idx} exceeds robot limits, trying next...")
+                print(f"Configuration with idx {idx} and q {q} exceeds robot limits, trying next...")
                 continue
             
             # Move to position
-            print(f"Moving to configuration {idx} with distance {distance:.4f}")
-            print(f"Target joints: {q}")
             self.robot.move_to_q(q)
             # self.collision.visualize(q, wait_for_input=True)
-            print("Motion started...")
             self.robot.wait_for_motion_stop()
-            print("Motion completed")
             return True
         
         print("❌ No valid configuration found within robot limits")
@@ -291,10 +225,7 @@ class RobotMove:
                    - transformation_matrices: list of 4x4 transformation matrices
                    Returns ([], []) if calibration fails.
         """
-        print("="*70)
         print("  ROBOT CALIBRATION")
-        print("="*70)
-        print()
         
         # Load calibration positions
         print(f"Loading calibration positions from: {positions_file}")
@@ -303,7 +234,7 @@ class RobotMove:
             print(f"Loaded {len(positions)} calibration positions")
             print()
         except Exception as e:
-            print(f"❌ Failed to load positions: {e}")
+            print(f"Failed to load positions: {e}")
             return [], []
         
         # Initialize robot if needed
@@ -318,7 +249,7 @@ class RobotMove:
             print("Robot ready")
             print()
         except Exception as e:
-            print(f"❌ Failed to initialize robot: {e}")
+            print(f"Failed to initialize robot: {e}")
             return [], []
         
         # Arrays to store images and transformation matrices
@@ -330,14 +261,13 @@ class RobotMove:
         failed_captures = 0
         
         for i, (pos_name, target_pose) in enumerate(positions, 1):
-            print(f"{'='*70}")
+
             print(f"Position {i}/{len(positions)}: {pos_name}")
-            print(f"{'='*70}")
             
             # Move to position
             print(f"Moving to position...")
             if not self.move_to_pose(target_pose):
-                print(f"❌ Failed to move to position {pos_name}")
+                print(f"Failed to move to position {pos_name}")
                 failed_captures += 1
                 continue
             
@@ -354,35 +284,21 @@ class RobotMove:
             try:
                 image = self.robot.grab_image()
                 if image is None:
-                    print(f"❌ Failed to capture image at position {pos_name}")
+                    print(f"Failed to capture image at position {pos_name}")
                     failed_captures += 1
                     continue
                 print(f"Image captured: {image.shape}")
             except Exception as e:
-                print(f"❌ Error capturing image: {e}")
+                print(f"Error capturing image: {e}")
                 failed_captures += 1
                 continue
             
             # Append to arrays
             imgs.append(image)
             transformation_matrices.append(transformation_matrix)
-            print(f"✅ Data added to calibration arrays (entry {len(imgs)})")
+            print(f"Data added to calibration arrays (entry {len(imgs)})")
             successful_captures += 1
             print()
-        
-        # Summary
-        print("="*70)
-        print("  CALIBRATION SUMMARY")
-        print("="*70)
-        print(f"Total positions: {len(positions)}")
-        print(f"Successful captures: {successful_captures}")
-        print(f"Failed captures: {failed_captures}")
-        print(f"Images collected: {len(imgs)}")
-        print(f"Transformation matrices collected: {len(transformation_matrices)}")
-        print()
-        print("="*70)
-        print("  CALIBRATION COMPLETE")
-        print("="*70)
         
         return (imgs, transformation_matrices)
     
@@ -448,7 +364,6 @@ class RobotMove:
         # print(seq)
         for T in seq:
             target_T = SE3(translation = [0,0,-0.02]) * T * CRC_OFF.inverse()
-            # print("target", target_T)
             # is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous())
             is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous(), seq, coli_seq, check_angle)
             if not is_valid:
@@ -474,10 +389,10 @@ class RobotMove:
 
     def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
         new_seq = []
-        valid_segments = [False for _ in range(len(main_points_idx)-1)]
         coli_seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, SE3())
 
         for i in range(len(main_points_idx)-1):
+            prev_angle_idx = 0
             start_idx = main_points_idx[i]
             end_idx = main_points_idx[i+1]
             
@@ -489,6 +404,7 @@ class RobotMove:
                 z_rot = SE3(rotation = SO3().rz(angle))
                 seq_segment = self.trajectory.to_puzzle_matrice(puzzle_base, matrices_segment, z_rot)
                 current_q = self.robot.get_q()
+<<<<<<< HEAD
                 #FIXME: it does not work correctly
                 # We move to new angle and then move back
                 print(seq_segment)
@@ -503,31 +419,35 @@ class RobotMove:
                         seq_segment.insert(k, T2)
                 ##FIXME: end
                 print("---------------------------\n", seq_segment)
+=======
+                
+>>>>>>> David
                 if i == 0:
-                    seq_segment.insert(0, seq_segment[0] * SE3(translation = [0,0,-0.03]))
-                    seq_segment.insert(0, SE3(translation = [0,0,0.04]) * seq_segment[0])
-                    if not self.seq_check(current_q, seq_segment[:1], CRC_OFF, coli_seq, False):
+                    start_point_2 = seq_segment[0] * SE3(translation = [0,0,-0.03])
+                    start_point_1 = SE3(translation = [0,0,0.04]) * start_point_2
+                    seq_segment.insert(0, start_point_1)
+                    seq_segment.insert(1, start_point_2)
+
+                    if not self.seq_check(current_q, seq_segment[:2], CRC_OFF, coli_seq, False):
                         print("Cant get to starting position")
                         continue
-                if self.seq_check(current_q, seq_segment[1:], CRC_OFF, coli_seq ,True):
-                    new_seq.extend(seq_segment)
+                elif j != prev_angle_idx :
+                    # find the angle change from previous segment with count angle change in 16 steps
+                    diff_angle_idx = abs(prev_angle_idx - j)
+                    T_start = new_seq[-1]
+                    T_end = seq_segment[0]
+                    angle_seq_seg = self.trajectory.generate_segment(T_start, T_end, num_points=diff_angle_idx + 2)
+                    old_seq_seg = seq_segment[1:]
+                    seq_segment = list(angle_seq_seg[1:]) + list(old_seq_seg)
+                #todo seq_segment[1:] nebude fungovat pokud nejsem na zacatku i == 0
+                start_idx = 1 if i == 0 else 0
+                if self.seq_check(current_q, seq_segment[start_idx:], CRC_OFF, coli_seq ,True):
+                    new_seq.extend(seq_segment[:])
                     valid_segment_found = True
-                    valid_segments[i] = True
+                    prev_angle_idx = j
                     break
             if not valid_segment_found:
                 return None  
-        # for i in range(16):
-        #     angle = np.pi * (2*i / 16)
-        #     z_rot = SE3(rotation = SO3().rz(angle))
-        #     # z_rot = SE3(rotation = puzzle_base.rotation.inverse())
-        #     # print(z_rot)
-        #     # print(SE3(rotation = puzzle_base.rotation.inverse()))
-        #     seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, z_rot)
-        #     seq.insert(0, seq[0] * SE3(translation = [0,0,-0.03]))
-        #     current_q = self.robot.get_q()
-
-        #     if self.seq_check(current_q, seq, CRC_OFF):
-        #         return seq
 
         return new_seq
     
