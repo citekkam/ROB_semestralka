@@ -363,6 +363,7 @@ class RobotMove:
             if check_angle:
                 if self.dif_angle_check(self.current_q, q, np.pi * 5/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
+                    self.q_seq.append[q]
                     return True, idx
             else:
                 print("checking start")
