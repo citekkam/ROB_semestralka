@@ -404,24 +404,7 @@ class RobotMove:
                 z_rot = SE3(rotation = SO3().rz(angle))
                 seq_segment = self.trajectory.to_puzzle_matrice(puzzle_base, matrices_segment, z_rot)
                 current_q = self.robot.get_q()
-<<<<<<< HEAD
-                #FIXME: it does not work correctly
-                # We move to new angle and then move back
-                print(seq_segment)
-                if i != 0:
-                    seq_segment.pop(0) ## ?? does this fix it?
-                    for k in range(j+2):
-                        T1 = new_seq[-1]
-                        t = k/(j+1+2)
-                        rot = SE3(rotation=SO3().rz((t) * angle))
-                        T2 = T1 * rot
-                        # print(T1, T2, "\n")
-                        seq_segment.insert(k, T2)
-                ##FIXME: end
-                print("---------------------------\n", seq_segment)
-=======
                 
->>>>>>> David
                 if i == 0:
                     start_point_2 = seq_segment[0] * SE3(translation = [0,0,-0.03])
                     start_point_1 = SE3(translation = [0,0,0.04]) * start_point_2
@@ -440,7 +423,7 @@ class RobotMove:
                     old_seq_seg = seq_segment[1:]
                     seq_segment = list(angle_seq_seg[1:]) + list(old_seq_seg)
                 #todo seq_segment[1:] nebude fungovat pokud nejsem na zacatku i == 0
-                start_idx = 1 if i == 0 else 0
+                start_idx = 2 if i == 0 else 0
                 if self.seq_check(current_q, seq_segment[start_idx:], CRC_OFF, coli_seq ,True):
                     new_seq.extend(seq_segment[:])
                     valid_segment_found = True
