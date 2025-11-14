@@ -410,7 +410,7 @@ class RobotMove:
         coli_seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, SE3())
         self.current_q = self.robot.get_q()
         self.q_seq = []
-        prev_angle = 0
+        prev_angle = 0.0
         for i in range(len(main_points_idx)-1):
             prev_angle_idx = 0
             start_idx = main_points_idx[i]
@@ -425,14 +425,18 @@ class RobotMove:
                 seq_segment = self.trajectory.to_puzzle_matrice(puzzle_base, matrices_segment, z_rot)
                 
                 if i == 0:
-                    start_point_2 = seq_segment[0] * SE3(translation = [0,0,-0.03])
-                    start_point_1 = SE3(translation = [0,0,0.04]) * start_point_2
+                    start_point_2 = seq_segment[0] * SE3(translation = [0,0,-0.04])
+                    start_point_1 = SE3(translation = [0,0,0.05]) * start_point_2
                     seq_segment.insert(0, start_point_1)
                     seq_segment.insert(1, start_point_2)
 
                     if not self.seq_check(seq_segment[:2], CRC_OFF, coli_seq, False):
                         print("Cant get to starting position")
                         continue
+                    self.q_seq.extend(self.current_q_seq[:])
+                    # test angle 
+                    # angle = -np.pi/2 + np.pi * (j / 15)
+
                 elif angle != prev_angle :
                     # find the angle change from previous segment with count angle change in 16 steps
                     diff_angle_idx = j
@@ -445,11 +449,12 @@ class RobotMove:
                 start_idx = 2 if i == 0 else 0
                 if self.seq_check(seq_segment[start_idx:], CRC_OFF, coli_seq ,True):
                     new_seq.extend(seq_segment[:])
-                    self.q_seq.append(self.current_q_seq[:])
+                    self.q_seq.extend(self.current_q_seq[:])
                     valid_segment_found = True
                     prev_angle = angle
                     break
             if not valid_segment_found:
+                self.q_seq = []
                 return None  
 
         return new_seq
