@@ -456,7 +456,8 @@ if __name__ == "__main__":
     # btw_seq_1_2 = RobotTrajectory.generate_segment(start_1, start_2, num_points=10)
     btw_seq_2_end = RobotTrajectory.generate_segment(start_2, end_1, num_points=10)
 
-    start = start_seq_2 + btw_seq_2_end + start_seq_1 + btw_seq_1_start + st_st_seq
+    # start = start_seq_2 + btw_seq_2_end + start_seq_1 + btw_seq_1_start + st_st_seq
+    start = start_seq_1 + btw_seq_1_start + st_st_seq
     # start = test_traj + start_seq_1 + start_seq_2
 
     # Prepend the starting pose. list.insert mutates in-place and returns None, so call it separately.
