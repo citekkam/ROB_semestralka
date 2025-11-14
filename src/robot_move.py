@@ -39,6 +39,7 @@ class RobotMove:
         self.joint_weights = joint_weights if joint_weights is not None else np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
         self.collision = Collision()
         self.current_q = self.robot.get_q()
+        self.q_seq = []
     
     @classmethod
     def create(cls, robot_type: str = "CRS93", soft_home: bool = False, 
@@ -362,13 +363,15 @@ class RobotMove:
             if check_angle:
                 if self.dif_angle_check(self.current_q, q, np.pi * 5/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
+                    self.q_seq.append[q]
                     return True, idx
             else:
                 print("checking start")
                 if self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
-                    print("Robot not in limits or collision")
+                    self.q_seq.append[q]
                     return True, idx
+        print("Robot not in limits or collision")
         return False, None
     
     def seq_check (self, seq: list, CRC_OFF, coli_seq, check_angle = True) -> bool:
@@ -452,21 +455,22 @@ class RobotMove:
 
 
     def go_traj(self, seq : SE3, CRC_OFF) -> bool:
-        if seq == None:
+        # if seq == None:
+        #     print("WARN: No trajectory found!")
+        #     return
+
+        if len(self.q_seq) == 0:
             print("WARN: No trajectory found!")
             return
 
-        for T in seq:
-            e_pos = SE3(translation = [0,0,-0.0166]) * T * CRC_OFF.inverse()
-            print(e_pos)
-            self.move_to_pose_T(e_pos.homogeneous())
+
+        for q in self.q_seq:
+            self.robot.move_to_q(q)
             self.robot.wait_for_motion_stop()
             
-        seq_i = seq[::-1]
-        for T in seq_i:
-            e_pos = SE3(translation = [0,0,-0.0166]) * T * CRC_OFF.inverse()
-            print(e_pos)
-            self.move_to_pose_T(e_pos.homogeneous())
+        self.q_seq = self.q_seq[::-1]
+        for q in self.q_seq:
+            self.robot.move_to_q(q)
             self.robot.wait_for_motion_stop()
 
 
