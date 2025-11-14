@@ -331,7 +331,6 @@ class RobotMove:
         return positions
 
     def dif_angle_check(self, current_q : np.ndarray, target_q : np.ndarray, rng : float) -> bool:
-        # print(current_q[-1])
         print(current_q)
         # if current_q[-1] > 0.1:
         #     input()
@@ -378,7 +377,6 @@ class RobotMove:
         # print("target T : ", seq[0] * CRC_OFF.inverse())
         # print("seq :", *seq, sep="\n")
         # print(seq)
-        
 
         for T in seq:
             target_T = SE3(translation = [0,0,-0.02]) * T * CRC_OFF.inverse()
