@@ -330,15 +330,21 @@ class RobotMove:
         return positions
 
     def dif_angle_check(self, current_q : np.ndarray, target_q : np.ndarray, rng : float) -> bool:
-        print(current_q[-1])
+        # print(current_q[-1])
         print(current_q)
-        if current_q[-1] > 0.1:
-            input()
+        # if current_q[-1] > 0.1:
+        #     input()
         for i in range(len(current_q)):
             diff = abs(current_q[i] - target_q[i])
-            if diff > rng:
-                print("Angle issue")
-                return False
+            if i == len(current_q) or i == 3:
+                print(diff)
+                if diff > rng / 2:
+                    print("Angle issue in EE")
+                    return False
+            else:
+                if diff > rng:
+                    print("Angle issue")
+                    return False
         return True
 
 
@@ -354,7 +360,7 @@ class RobotMove:
             q = ik_solutions[idx]
             # todo collision check
             if check_angle:
-                if self.dif_angle_check(self.current_q, q, np.pi* 3/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
+                if self.dif_angle_check(self.current_q, q, np.pi * 5/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
                     return True, idx
             else:
@@ -400,7 +406,7 @@ class RobotMove:
         new_seq = []
         coli_seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, SE3())
         self.current_q = self.robot.get_q()
-
+        prev_angle = 0
         for i in range(len(main_points_idx)-1):
             prev_angle_idx = 0
             start_idx = main_points_idx[i]
@@ -410,7 +416,7 @@ class RobotMove:
             valid_segment_found = False
 
             for j in range(16):
-                angle = np.pi * (2*j / 16)
+                angle = prev_angle + np.pi * (2*j / 16)
                 z_rot = SE3(rotation = SO3().rz(angle))
                 seq_segment = self.trajectory.to_puzzle_matrice(puzzle_base, matrices_segment, z_rot)
                 
@@ -423,9 +429,9 @@ class RobotMove:
                     if not self.seq_check(seq_segment[:2], CRC_OFF, coli_seq, False):
                         print("Cant get to starting position")
                         continue
-                elif j != prev_angle_idx :
+                elif angle != prev_angle :
                     # find the angle change from previous segment with count angle change in 16 steps
-                    diff_angle_idx = abs(prev_angle_idx - j)
+                    diff_angle_idx = j
                     T_start = new_seq[-1]
                     T_end = seq_segment[0]
                     angle_seq_seg = self.trajectory.generate_segment(T_start, T_end, num_points=diff_angle_idx + 2)
@@ -433,10 +439,10 @@ class RobotMove:
                     seq_segment = list(angle_seq_seg[1:]) + list(old_seq_seg)
                 #todo seq_segment[1:] nebude fungovat pokud nejsem na zacatku i == 0
                 start_idx = 2 if i == 0 else 0
-                if self.seq_check(current_q, seq_segment[start_idx:], CRC_OFF, coli_seq ,True):
+                if self.seq_check(seq_segment[start_idx:], CRC_OFF, coli_seq ,True):
                     new_seq.extend(seq_segment[:])
                     valid_segment_found = True
-                    prev_angle_idx = j
+                    prev_angle = angle
                     break
             if not valid_segment_found:
                 return None  
