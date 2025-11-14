@@ -459,7 +459,7 @@ class RobotMove:
         #     print("WARN: No trajectory found!")
         #     return
 
-        if len(self.q_seq) == 0:
+        if seq is not None and len(self.q_seq) == 0 :
             print("WARN: No trajectory found!")
             return
 
