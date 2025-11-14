@@ -341,13 +341,12 @@ class RobotMove:
         for i in range(len(current_q)):
             diff = abs(current_q[i] - target_q[i])
             idx = i
-            if diff > rng / 2.5:
-                print("Angle issue in EE")
+            if diff > rng / 1.5:
+                # print("Angle issue 2")
                 pair_err_check[idx] = True
-            else:
-                if diff > rng:
-                    print("Angle issue")
-                    return False
+            if diff > rng:
+                # print("Angle issue")
+                return False
 
 
         if pair_err_check[0] == True or pair_err_check[1] == True: # for q 0 and 2 or 3 and 4 or 0 or 1 
@@ -377,7 +376,6 @@ class RobotMove:
                     self.current_q = q
                     return True, idx
             else:
-                print("checking start")
                 if self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
                     return True, idx
@@ -395,26 +393,10 @@ class RobotMove:
             # is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous())
             is_valid, idx = self.ik_sol_check(target_T.homogeneous(), seq, coli_seq, check_angle)
             if not is_valid:
-                print("Cant get to :", target_T)
+                # print("Cant get to :", target_T)
                 return False
             self.current_q_seq.append(self.current_q[:])
         return True
-
-    # def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
-    #     for i in range(16):
-    #         angle = np.pi * (2*i / 16)
-    #         z_rot = SE3(rotation = SO3().rz(angle))
-    #         # z_rot = SE3(rotation = puzzle_base.rotation.inverse())
-    #         # print(z_rot)
-    #         # print(SE3(rotation = puzzle_base.rotation.inverse()))
-    #         seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, z_rot)
-    #         seq.insert(0, seq[0] * SE3(translation = [0,0,-0.03]))
-    #         current_q = self.robot.get_q()
-
-    #         if self.seq_check(current_q, seq, CRC_OFF):
-    #             return seq
-
-    #     return None
 
     def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
         new_seq = []
@@ -476,8 +458,6 @@ class RobotMove:
         # if seq == None:
         #     print("WARN: No trajectory found!")
         #     return
-        
-        print("q_seq",*self.q_seq)
 
         if seq is not None and len(self.q_seq) == 0 :
             print("WARN: No trajectory found!")

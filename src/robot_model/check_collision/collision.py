@@ -152,7 +152,7 @@ class Collision:
             pin.removeCollisionPairs(self.model, self.collision_model, srdf_path)
             print("✓ SRDF collision filters applied")
         except Exception as e:
-            print(f"⚠️  Warning: SRDF not found or failed: {e}")
+            print(f"Warning: SRDF not found or failed: {e}")
         
         # Add all collision pairs
         self.collision_model.addAllCollisionPairs()
