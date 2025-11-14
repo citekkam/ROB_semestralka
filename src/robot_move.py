@@ -348,11 +348,7 @@ class RobotMove:
         return True
 
 
-<<<<<<< HEAD
-    def ik_sol_check(self, current_q: np.ndarray, target_T: np.ndarray, seq : list, coli_seq : list, check_angle = True, prev_q) -> [bool, int]:
-=======
     def ik_sol_check(self, target_T: np.ndarray, seq : list, coli_seq : list, check_angle = True) -> [bool, int]:
->>>>>>> test_branch
         """check if there is an ik solution within range pi/2 from current_q,
             check if it is within robot limits and
             check the collisions
@@ -364,22 +360,13 @@ class RobotMove:
             q = ik_solutions[idx]
             # todo collision check
             if check_angle:
-<<<<<<< HEAD
-                if self.dif_angle_check(current_q, q, np.pi* 2/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
-                    prev_q = q
-=======
                 if self.dif_angle_check(self.current_q, q, np.pi * 5/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
->>>>>>> test_branch
                     return True, idx
             else:
                 print("checking start")
                 if self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
-<<<<<<< HEAD
-                    prev_q = q
-=======
                     self.current_q = q
->>>>>>> test_branch
                     print("Robot not in limits or collision")
                     return True, idx
         return False, None
@@ -388,20 +375,12 @@ class RobotMove:
         # print("target T : ", seq[0] * CRC_OFF.inverse())
         # print("seq :", *seq, sep="\n")
         # print(seq)
-<<<<<<< HEAD
-        prev_q = current_q
-        for T in seq:
-            target_T = SE3(translation = [0,0,-0.02]) * T * CRC_OFF.inverse()
-            # is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous())
-            is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous(), seq, coli_seq, check_angle, prev_q)
-=======
         
 
         for T in seq:
             target_T = SE3(translation = [0,0,-0.02]) * T * CRC_OFF.inverse()
             # is_valid, idx = self.ik_sol_check(current_q, target_T.homogeneous())
             is_valid, idx = self.ik_sol_check(target_T.homogeneous(), seq, coli_seq, check_angle)
->>>>>>> test_branch
             if not is_valid:
                 print("Cant get to :", target_T)
                 return False
