@@ -411,7 +411,7 @@ class RobotMove:
                     seq_segment.insert(0, start_point_1)
                     seq_segment.insert(1, start_point_2)
 
-                    if not self.seq_check(current_q, seq_segment[:1], CRC_OFF, coli_seq, False):
+                    if not self.seq_check(current_q, seq_segment[:2], CRC_OFF, coli_seq, False):
                         print("Cant get to starting position")
                         continue
                 elif j != prev_angle_idx :
@@ -423,7 +423,8 @@ class RobotMove:
                     old_seq_seg = seq_segment[1:]
                     seq_segment = list(angle_seq_seg[1:]) + list(old_seq_seg)
                 #todo seq_segment[1:] nebude fungovat pokud nejsem na zacatku i == 0
-                if self.seq_check(current_q, seq_segment[1:], CRC_OFF, coli_seq ,True):
+                start_idx = 1 if i == 0 else 0
+                if self.seq_check(current_q, seq_segment[start_idx:], CRC_OFF, coli_seq ,True):
                     new_seq.extend(seq_segment[:])
                     valid_segment_found = True
                     prev_angle_idx = j
