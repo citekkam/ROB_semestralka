@@ -40,6 +40,7 @@ class RobotMove:
         self.collision = Collision()
         self.current_q = self.robot.get_q()
         self.q_seq = []
+        self.current_q_seq = []
     
     @classmethod
     def create(cls, robot_type: str = "CRS93", soft_home: bool = False, 
@@ -363,13 +364,11 @@ class RobotMove:
             if check_angle:
                 if self.dif_angle_check(self.current_q, q, np.pi * 5/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
-                    self.q_seq.append[q]
                     return True, idx
             else:
                 print("checking start")
                 if self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
-                    self.q_seq.append[q]
                     return True, idx
         print("Robot not in limits or collision")
         return False, None
@@ -378,7 +377,7 @@ class RobotMove:
         # print("target T : ", seq[0] * CRC_OFF.inverse())
         # print("seq :", *seq, sep="\n")
         # print(seq)
-        
+        self.current_q_seq = []
 
         for T in seq:
             target_T = SE3(translation = [0,0,-0.02]) * T * CRC_OFF.inverse()
@@ -387,6 +386,7 @@ class RobotMove:
             if not is_valid:
                 print("Cant get to :", target_T)
                 return False
+            self.current_q_seq.append(self.current_q[:])
         return True
 
     # def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
@@ -409,6 +409,7 @@ class RobotMove:
         new_seq = []
         coli_seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, SE3())
         self.current_q = self.robot.get_q()
+        self.q_seq = []
         prev_angle = 0
         for i in range(len(main_points_idx)-1):
             prev_angle_idx = 0
@@ -444,6 +445,7 @@ class RobotMove:
                 start_idx = 2 if i == 0 else 0
                 if self.seq_check(seq_segment[start_idx:], CRC_OFF, coli_seq ,True):
                     new_seq.extend(seq_segment[:])
+                    self.q_seq.append(self.current_q_seq[:])
                     valid_segment_found = True
                     prev_angle = angle
                     break
@@ -458,6 +460,8 @@ class RobotMove:
         # if seq == None:
         #     print("WARN: No trajectory found!")
         #     return
+        
+        print("q_seq",*self.q_seq)
 
         if seq is not None and len(self.q_seq) == 0 :
             print("WARN: No trajectory found!")
@@ -465,6 +469,7 @@ class RobotMove:
 
 
         for q in self.q_seq:
+            print("q", q)
             self.robot.move_to_q(q)
             self.robot.wait_for_motion_stop()
             
