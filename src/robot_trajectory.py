@@ -443,13 +443,20 @@ if __name__ == "__main__":
     # Správné statické volání:
     test_traj = RobotTrajectory.generate_segment(T_start, T_end, num_points=16)
 
+    start_1 = viz_trajectory[0] * SE3(translation = [0,0,0.04])
+    start_1 = viz_trajectory[0] * SE3(translation = [0,0,0.04],  rotation=SO3().rx(np.pi*1/4))
+    end_1 =  start_1 * SE3(translation = [0,0,0.07])
+    start_seq_1 = RobotTrajectory.generate_segment(end_1, start_1, num_points=20)
+    start_2 = start_1 * SE3(translation = [0,0,0.07], rotation=SO3().rx(np.pi*1/4))
+    end_2 = start_2 * SE3(translation = [0,0,0.05])
+    start_seq_2 = RobotTrajectory.generate_segment(end_2, start_2, num_points=20)
 
-    start_1 = viz_trajectory[0] * SE3(translation = [0,0,0.04],  rotation=SO3().rx(np.pi/2))
-    start_2 = start_1 * SE3(translation = [0,0,0.2])
-    start = RobotTrajectory.generate_segment(start_2, start_1, num_points=5)
+    # btw_seq_1_start = RobotTrajectory.generate_segment(start_1, viz_trajectory[0], num_points=10)
+    # btw_seq_1_2 = RobotTrajectory.generate_segment(start_1, start_2, num_points=10)
+    btw_seq_2_end = RobotTrajectory.generate_segment(start_2, end_1, num_points=10)
 
-    
-    print("sta rt:", start)
+    start = start_seq_2 + btw_seq_2_end + start_seq_1
+    # start = test_traj + start_seq_1 + start_seq_2
 
     # Prepend the starting pose. list.insert mutates in-place and returns None, so call it separately.
     # start.insert(0, T_start)

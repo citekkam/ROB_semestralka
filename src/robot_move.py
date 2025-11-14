@@ -408,7 +408,8 @@ class RobotMove:
                 if i == 0:
                     start_point_2 = seq_segment[0] * SE3(translation = [0,0,-0.03])
                     start_point_1 = SE3(translation = [0,0,0.04]) * start_point_2
-                    
+                    seq_segment.insert(0, start_point_1)
+                    seq_segment.insert(1, start_point_2)
 
                     if not self.seq_check(current_q, seq_segment[:1], CRC_OFF, coli_seq, False):
                         print("Cant get to starting position")
