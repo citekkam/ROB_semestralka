@@ -150,9 +150,9 @@ class Collision:
         
         try:
             pin.removeCollisionPairs(self.model, self.collision_model, srdf_path)
-            print("✓ SRDF collision filters applied")
+            # print("✓ SRDF collision filters applied")
         except Exception as e:
-            print(f"⚠️  Warning: SRDF not found or failed: {e}")
+            print(f"Warning: SRDF not found or failed: {e}")
         
         # Add all collision pairs
         self.collision_model.addAllCollisionPairs()
@@ -161,7 +161,7 @@ class Collision:
         # Create geometry data
         self.geom_data = pin.GeometryData(self.collision_model)
     
-    def add_aruco_sphere(self, pose: SE3, radius: float = 0.08, height: float = 0.02, name_suffix: str = "aruco") -> tuple:
+    def add_aruco_sphere(self, pose: SE3, radius: float = 0.18, height: float = 0.02, name_suffix: str = "aruco") -> tuple:
         """
         Přidá ArUco jako jeden válec (kolizní + vizuální) se stejným způsobem vložení pózy jako u sfér.
         Pozn.: hppfcl.Cylinder očekává poloviční délku (half-length).
@@ -322,7 +322,7 @@ class Collision:
             print(f"⚠️  Viewer error: {e}")
 
     def in_collision(self, q: np.ndarray, traj: list, radius: float = 0.007, offset: SE3 = None,
-                     add_aruco: bool = True, aruco_radius: float = 0.08, aruco_height: float = 0.02,
+                     add_aruco: bool = True, aruco_radius: float = 0.28, aruco_height: float = 0.02,
                      aruco_offset: float = 0.01, aruco_axis: str = "-z") -> bool:
         """
         Volitelně přidá ArUco sférický model odvozený z posledního bodu trajektorie.
