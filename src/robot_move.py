@@ -335,17 +335,29 @@ class RobotMove:
         print(current_q)
         # if current_q[-1] > 0.1:
         #     input()
+        
+        pair_err_check = [False, False, False ,False, False, False] # for q 0 and 2 or 3 and 4 
+
         for i in range(len(current_q)):
             diff = abs(current_q[i] - target_q[i])
-            if i == len(current_q) or i == 3:
-                print(diff)
-                if diff > rng / 2:
-                    print("Angle issue in EE")
-                    return False
+            idx = i
+            if diff > rng / 2.5:
+                print("Angle issue in EE")
+                pair_err_check[idx] = True
             else:
                 if diff > rng:
                     print("Angle issue")
                     return False
+
+
+        if pair_err_check[0] == True or pair_err_check[1] == True: # for q 0 and 2 or 3 and 4 or 0 or 1 
+            return False
+        if pair_err_check[0] == True and pair_err_check[2] == True:
+            return False
+        if pair_err_check[3] == True and pair_err_check[4] == True:
+            return False
+        if pair_err_check[3] == True and pair_err_check[5] == True:
+            return False
         return True
 
 
@@ -363,7 +375,6 @@ class RobotMove:
             if check_angle:
                 if self.dif_angle_check(self.current_q, q, np.pi * 5/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
-                    self.q_seq.append[q]
                     return True, idx
             else:
                 print("checking start")
@@ -442,7 +453,7 @@ class RobotMove:
                     diff_angle_idx = j
                     T_start = new_seq[-1]
                     T_end = seq_segment[0]
-                    angle_seq_seg = self.trajectory.generate_segment(T_start, T_end, num_points=diff_angle_idx + 2)
+                    angle_seq_seg = self.trajectory.generate_segment(T_start, T_end, num_points=diff_angle_idx + 10)
                     old_seq_seg = seq_segment[1:]
                     seq_segment = list(angle_seq_seg[1:]) + list(old_seq_seg)
                 #todo seq_segment[1:] nebude fungovat pokud nejsem na zacatku i == 0
