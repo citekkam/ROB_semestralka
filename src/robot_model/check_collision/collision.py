@@ -50,12 +50,14 @@ class Collision:
         # Create data structures
         self.data = self.model.createData()
         self.geom_data = None
+        self.aruco_pose = None
+        self.aruco_sphere = None
         
         # Storage for added spheres
         self.trajectory_spheres = []
         
-        print(f"✓ Robot loaded: {self.model.nq} DOF, "
-              f"{len(self.collision_model.geometryObjects)} collision objects")
+        # print(f"✓ Robot loaded: {self.model.nq} DOF, "
+        #       f"{len(self.collision_model.geometryObjects)} collision objects")
     
     def add_sphere(self, position: np.ndarray, radius: float = 0.05, 
                    name_suffix: str = "", offset: SE3 = None) -> tuple:
@@ -78,6 +80,7 @@ class Collision:
         # Create sphere geometry
         sphere_geom = hppfcl.Sphere(radius)
         sphere_pose = pin.SE3(np.eye(3), position)
+        self.aruco_pose = SE3(translation=position)
         
         # Add collision sphere
         sphere_collision = pin.GeometryObject(
@@ -158,6 +161,37 @@ class Collision:
         # Create geometry data
         self.geom_data = pin.GeometryData(self.collision_model)
     
+    def add_aruco_sphere(self, pose: SE3, radius: float = 0.08, height: float = 0.02, name_suffix: str = "aruco") -> tuple:
+        """
+        Přidá ArUco jako jeden válec (kolizní + vizuální) se stejným způsobem vložení pózy jako u sfér.
+        Pozn.: hppfcl.Cylinder očekává poloviční délku (half-length).
+        """
+        position = pose.translation
+        # Cylinder aligned with world Z (stejně jako sféra používá identickou rotaci = I)
+        cylinder_geom = hppfcl.Cylinder(radius, height * 0.5)
+        cylinder_pose = pin.SE3(np.eye(3), position)
+
+        col = pin.GeometryObject(f"aruco_collision_{name_suffix}", 0, cylinder_pose, cylinder_geom)
+        vis = pin.GeometryObject(f"aruco_visual_{name_suffix}", 0, cylinder_pose, cylinder_geom)
+
+        self.collision_model.addGeometryObject(col)
+        self.visual_model.addGeometryObject(vis)
+        self.aruco_sphere = (col, vis)
+        return col, vis
+
+    def compute_aruco_pose(self, last_pose: SE3, offset: float = 0.01, axis: str = "-z") -> SE3:
+        """
+        Odvodí pózu ArUco z posledního bodu trajektorie posunem v lokálním rámci.
+        axis: '+z' nebo '-z'
+        """
+        R = last_pose.rotation.rot
+        if axis == "-z":
+            v = np.array([0.0, 0.0, -offset])
+        else:
+            v = np.array([0.0, 0.0, offset])
+        t = last_pose.translation + R @ v
+        return SE3(translation=t, rotation=last_pose.rotation)
+
     def clean(self) -> None:
         """
         Clean trajectory spheres by reloading the robot model.
@@ -175,6 +209,8 @@ class Collision:
         self.data = self.model.createData()
         self.geom_data = None
         self.trajectory_spheres.clear()
+        self.aruco_pose = None
+        self.aruco_sphere = None
         
         # print("✓ Trajectory spheres cleaned (model reloaded)")
     
@@ -201,13 +237,12 @@ class Collision:
             g1 = self.collision_model.geometryObjects[pair.first].name
             g2 = self.collision_model.geometryObjects[pair.second].name
             
-            # Only check trajectory sphere collisions
-            if not ('sphere_collision_traj' in g1 or 'sphere_collision_traj' in g2):
+            # Trajektorie nebo ArUco
+            if not any(key in g1 or key in g2 for key in ('sphere_collision_traj', 'aruco_collision')):
                 continue
             
             if self.geom_data.collisionResults[k].isCollision():
                 print(f"IN COLLISION: {g1} ↔ {g2}")
-                # self.visualize(q, wait_for_input=True)
                 return True
         return False
     
@@ -239,11 +274,10 @@ class Collision:
         for k, pair in enumerate(self.collision_model.collisionPairs):
             g1 = self.collision_model.geometryObjects[pair.first].name
             g2 = self.collision_model.geometryObjects[pair.second].name
-            
-            # Only check trajectory sphere collisions
-            if not ('sphere_collision_traj' in g1 or 'sphere_collision_traj' in g2):
+
+            if not any(key in g1 or key in g2 for key in ('sphere_collision_traj', 'aruco_collision')):
                 continue
-            
+
             cr = self.geom_data.collisionResults[k]
             if cr.isCollision():
                 collision_count += 1
@@ -287,29 +321,24 @@ class Collision:
         except Exception as e:
             print(f"⚠️  Viewer error: {e}")
 
-    def in_collision(self, q: np.ndarray, traj: list, radius: float = 0.007, offset: SE3 = None) -> bool:
+    def in_collision(self, q: np.ndarray, traj: list, radius: float = 0.007, offset: SE3 = None,
+                     add_aruco: bool = True, aruco_radius: float = 0.08, aruco_height: float = 0.02,
+                     aruco_offset: float = 0.01, aruco_axis: str = "-z") -> bool:
         """
-        Check if robot is in collision along a trajectory.
-        
-        Args:
-            q: Robot joint configuration
-            traj: List of SE3 transformations representing the trajectory
-            radius: Sphere radius in meters
-            offset: Optional SE3 transformation for all spheres
-        Returns:
-            True if collision detected, False otherwise
+        Volitelně přidá ArUco sférický model odvozený z posledního bodu trajektorie.
         """
-        # Clean previous trajectory spheres
-        if len(self.trajectory_spheres) > 0:
+        if len(self.trajectory_spheres) > 0 or self.aruco_sphere is not None:
             self.clean()
-        
-        # Add trajectory spheres
+
         self.add_trajectory_spheres(traj, radius=radius, offset=offset)
-        
-        # Setup collision pairs
+
+        if add_aruco and len(traj) > 0:
+            # Póza ArUco se odvozuje z posledního SE3 trajektorie (ne z vnitřní proměnné)
+            last_pose = self.aruco_pose
+            self.aruco_pose = self.compute_aruco_pose(last_pose, offset=aruco_offset, axis=aruco_axis)
+            self.add_aruco_sphere(self.aruco_pose, radius=aruco_radius, height=aruco_height)
+
         self.setup_collision_pairs()
-        
-        # Check for collision
         return self.is_in_collision(q)
         
         
@@ -328,8 +357,8 @@ def main():
     )
     
     # Get trajectory for specific puzzles
-    trajectory_A = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)
-    trajectory_B = RobotTrajectory.get_trajectory_se3('B', segment_length=0.01)
+    trajectory_A, idxs_A = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)
+    trajectory_B, idxs_B = RobotTrajectory.get_trajectory_se3('B', segment_length=0.01)
     # trajectory_C = RobotTrajectory.get_trajectory_se3('C', segment_length=0.01)
     
     # Test configuration
@@ -339,12 +368,10 @@ def main():
     ])
 
     # Test with trajectory A
-    in_collision_A = tester.in_collision(q, trajectory_A, radius=0.007, offset=offset)
-    print(f" Trajectory A: {'COLLISION' if in_collision_A else 'NO COLLISION'}")
+    in_collision_A = tester.in_collision(q, trajectory_A, radius=0.007, offset=offset,)
 
     # Test with trajectory B (clean() is called automatically)
     in_collision_B = tester.in_collision(q, trajectory_B, radius=0.007, offset=offset)
-    print(f" Trajectory B: {'COLLISION' if in_collision_B else 'NO COLLISION'}")
     
     # Or manually clean and test
     # tester.clean()
