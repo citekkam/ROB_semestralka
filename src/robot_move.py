@@ -349,7 +349,7 @@ class RobotMove:
             q = ik_solutions[idx]
             # todo collision check
             if check_angle:
-                if self.dif_angle_check(current_q, q, np.pi* 3/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
+                if self.dif_angle_check(current_q, q, np.pi* 2/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     return True, idx
             else:
                 print("checking start")
