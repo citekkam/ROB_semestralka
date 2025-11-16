@@ -360,7 +360,7 @@ class RobotMove:
         return True
 
 
-    def ik_sol_check(self, target_T: np.ndarray, seq : list, coli_seq : list, check_angle = True) -> [bool, int]:
+    def ik_sol_check(self, target_T: np.ndarray, seq : list, coli_seq : list, check_angle = True) -> tuple[bool, int | None]:
         """check if there is an ik solution within range pi/2 from current_q,
             check if it is within robot limits and
             check the collisions
