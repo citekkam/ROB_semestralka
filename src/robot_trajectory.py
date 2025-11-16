@@ -386,7 +386,7 @@ class RobotTrajectory:
         # Applies puzzle base transformation and end-effector rotation to matrices
         ret = []
         for T in matrices:
-            # --- TODO - fix tranforamtions
+            # tranforamtions
             T = puzzle_base * T
             T_ee = T * SE3(rotation = SO3().ry(np.pi)) * z_rot
             # T = SE3(translation = T.translation, rotation = SO3().ry(np.pi))
@@ -397,84 +397,84 @@ class RobotTrajectory:
         return ret
 
 
-# Example usage
-if __name__ == "__main__":
-    """Example usage of RobotTrajectory class with simplified API."""
+# # Example usage
+# if __name__ == "__main__":
+#     """Example usage of RobotTrajectory class with simplified API."""
     
-    print("=" * 70)
-    print("ROBOT TRAJECTORY CLASS - SIMPLIFIED USAGE")
-    print("=" * 70)
-    print()
+#     print("=" * 70)
+#     print("ROBOT TRAJECTORY CLASS - SIMPLIFIED USAGE")
+#     print("=" * 70)
+#     print()
     
-    # ========================================================================
-    # SIMPLIFIED API - ONE-LINE TRAJECTORY GENERATION
-    # ========================================================================
-    print("✨ Generate trajectory in one call:")
-    print("-" * 70)
+#     # ========================================================================
+#     # SIMPLIFIED API - ONE-LINE TRAJECTORY GENERATION
+#     # ========================================================================
+#     print("✨ Generate trajectory in one call:")
+#     print("-" * 70)
     
-    # Generate trajectory as SE3 objects with segment_length
-    # trajectory = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)
-    # print(f"✅ Puzzle A: Generated {len(trajectory)} SE3 transformations (1cm spacing)")
+#     # Generate trajectory as SE3 objects with segment_length
+#     # trajectory = RobotTrajectory.get_trajectory_se3('A', segment_length=0.01)
+#     # print(f"✅ Puzzle A: Generated {len(trajectory)} SE3 transformations (1cm spacing)")
     
-    # trajectory = RobotTrajectory.get_trajectory_se3('B', segment_length=0.005)
-    # print(f"✅ Puzzle B: Generated {len(trajectory)} SE3 transformations (5mm spacing)")
+#     # trajectory = RobotTrajectory.get_trajectory_se3('B', segment_length=0.005)
+#     # print(f"✅ Puzzle B: Generated {len(trajectory)} SE3 transformations (5mm spacing)")
     
-    # # Or use fixed number of points
-    # trajectory = RobotTrajectory.get_trajectory_se3('C', num_points=100)
-    # print(f"✅ Puzzle C: Generated {len(trajectory)} SE3 transformations (100 points)")
+#     # # Or use fixed number of points
+#     # trajectory = RobotTrajectory.get_trajectory_se3('C', num_points=100)
+#     # print(f"✅ Puzzle C: Generated {len(trajectory)} SE3 transformations (100 points)")
     
-    # # Convert to homogeneous matrices
-    # matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)
-    # print(f"✅ Converted to {len(matrices)} homogeneous matrices (4x4)")
-    # print(f"   Example matrix:\n{matrices[0]}")
-    # print()
+#     # # Convert to homogeneous matrices
+#     # matrices = RobotTrajectory.to_homogeneous_matrices(trajectory)
+#     # print(f"✅ Converted to {len(matrices)} homogeneous matrices (4x4)")
+#     # print(f"   Example matrix:\n{matrices[0]}")
+#     # print()
     
-    # ========================================================================
-    # VISUALIZATION
-    # ========================================================================
-    print("📊 Visualize trajectory:")
-    print("-" * 70)
+#     # ========================================================================
+#     # VISUALIZATION
+#     # ========================================================================
+#     print("📊 Visualize trajectory:")
+#     print("-" * 70)
     
-    # Generate trajectory for visualization
-    viz_trajectory, main_idx = RobotTrajectory.get_trajectory_se3('D', segment_length=0.01)
+#     # Generate trajectory for visualization
+#     viz_trajectory, main_idx = RobotTrajectory.get_trajectory_se3('D', segment_length=0.01)
 
-    # T_start = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=SO3().rz(-np.pi/2))
-    # T_end = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=SO3().rz(np.pi/2))
+#     # T_start = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=SO3().rz(-np.pi/2))
+#     # T_end = SE3(translation=np.array([0.0327, 0.1, 0.16]), rotation=SO3().rz(np.pi/2))
 
-    # Správné statické volání:
-    # test_traj = RobotTrajectory.generate_segment(T_start, T_end, num_points=16)
+#     # Správné statické volání:
+#     # test_traj = RobotTrajectory.generate_segment(T_start, T_end, num_points=16)
 
-    start_2 = viz_trajectory[0] * SE3(translation = [0,0,0.04])
-    st_st_seq = RobotTrajectory.generate_segment(start_2, viz_trajectory[0], num_points=10)
-    # start_1 = viz_trajectory[0] * SE3(translation = [0,0,0.04],  rotation=SO3().rx(np.pi*1/4))
-    # end_1 =  start_1 * SE3(translation = [0,0,0.07])
-    # start_seq_1 = RobotTrajectory.generate_segment(end_1, start_1, num_points=20)
-    # start_2 = start_1 * SE3(translation = [0,0,0.07], rotation=SO3().rx(np.pi*1/4))
-    # end_2 = start_2 * SE3(translation = [0,0,0.05])
-    # start_seq_2 = RobotTrajectory.generate_segment(end_2, start_2, num_points=20)
-    start_1 = SE3(translation = [0,0,0.04]) * start_2
-    btw_seq_2_start = RobotTrajectory.generate_segment(start_2, viz_trajectory[0], num_points=10)
-    btw_seq_1_2 = RobotTrajectory.generate_segment(start_1, start_2, num_points=10)
+#     start_2 = viz_trajectory[0] * SE3(translation = [0,0,0.04])
+#     st_st_seq = RobotTrajectory.generate_segment(start_2, viz_trajectory[0], num_points=10)
+#     # start_1 = viz_trajectory[0] * SE3(translation = [0,0,0.04],  rotation=SO3().rx(np.pi*1/4))
+#     # end_1 =  start_1 * SE3(translation = [0,0,0.07])
+#     # start_seq_1 = RobotTrajectory.generate_segment(end_1, start_1, num_points=20)
+#     # start_2 = start_1 * SE3(translation = [0,0,0.07], rotation=SO3().rx(np.pi*1/4))
+#     # end_2 = start_2 * SE3(translation = [0,0,0.05])
+#     # start_seq_2 = RobotTrajectory.generate_segment(end_2, start_2, num_points=20)
+#     start_1 = SE3(translation = [0,0,0.04]) * start_2
+#     btw_seq_2_start = RobotTrajectory.generate_segment(start_2, viz_trajectory[0], num_points=10)
+#     btw_seq_1_2 = RobotTrajectory.generate_segment(start_1, start_2, num_points=10)
 
-    # btw_seq_1_start = RobotTrajectory.generate_segment(start_2, start_1, num_points=10)
-    # # btw_seq_1_2 = RobotTrajectory.generate_segment(start_1, start_2, num_points=10)
-    # btw_seq_2_end = RobotTrajectory.generate_segment(start_2, end_1, num_points=10)
+#     # btw_seq_1_start = RobotTrajectory.generate_segment(start_2, start_1, num_points=10)
+#     # # btw_seq_1_2 = RobotTrajectory.generate_segment(start_1, start_2, num_points=10)
+#     # btw_seq_2_end = RobotTrajectory.generate_segment(start_2, end_1, num_points=10)
 
-    # start = start_seq_2 + btw_seq_2_end + start_seq_1 + btw_seq_1_start + st_st_seq
-    start = btw_seq_1_2 + btw_seq_2_start
-    # start = test_traj + start_seq_1 + start_seq_2
+#     # start = start_seq_2 + btw_seq_2_end + start_seq_1 + btw_seq_1_start + st_st_seq
+#     start = btw_seq_1_2 + btw_seq_2_start
+#     # start = test_traj + start_seq_1 + start_seq_2
 
-    # Prepend the starting pose. list.insert mutates in-place and returns None, so call it separately.
-    # start.insert(0, T_start)
+#     # Prepend the starting pose. list.insert mutates in-place and returns None, so call it separately.
+#     # start.insert(0, T_start)
 
-    print("Text visualization:")
-    # visualize_trajectory(start)
-    visualize_trajectory(start + viz_trajectory)
+#     print("Text visualization:")
+#     # visualize_trajectory(start)
+#     visualize_trajectory(start + viz_trajectory)
 
-    print("\n3D plot visualization (close window to continue)...")
-    try:
-        plot_trajectory_3d(start + viz_trajectory)
-    except ImportError:
-        print("⚠️  Matplotlib not available. Install: pip install matplotlib")
-    except Exception as e:
-        print(f"⚠️  Could not create plot: {e}")
+#     print("\n3D plot visualization (close window to continue)...")
+#     try:
+#         plot_trajectory_3d(start + viz_trajectory)
+#     except ImportError:
+#         print("⚠️  Matplotlib not available. Install: pip install matplotlib")
+#     except Exception as e:
+#         print(f"⚠️  Could not create plot: {e}")

@@ -186,7 +186,7 @@ class RobotMove:
         ik_solutions = self.robot.ik(target_T)
         
         if len(ik_solutions) == 0:
-            print(f"⚠️  No IK solutions found for target transformation")
+            print(f" No IK solutions found for target transformation")
             return False
         
         # print(f"Found {len(ik_solutions)} IK solutions")
@@ -209,7 +209,7 @@ class RobotMove:
             self.robot.wait_for_motion_stop()
             return True
         
-        print("❌ No valid configuration found within robot limits")
+        print("No valid configuration found within robot limits")
         return False
     
     def calibration_move(self, positions_file: str, soft_home: bool = True) -> tuple:
@@ -347,7 +347,6 @@ class RobotMove:
                     return False
         return True
 
-
     def ik_sol_check(self, target_T: np.ndarray, seq : list, coli_seq : list, check_angle = True) -> [bool, int]:
         """check if there is an ik solution within range pi/2 from current_q,
             check if it is within robot limits and
@@ -358,7 +357,7 @@ class RobotMove:
         sorted_distances = self.select_shortest_path(self.current_q, ik_solutions)
         for idx, distance, _ in sorted_distances:
             q = ik_solutions[idx]
-            # todo collision check
+
             if check_angle:
                 if self.dif_angle_check(self.current_q, q, np.pi * 5/4) and self.robot.in_limits(q) and not self.collision.in_collision(q, coli_seq):
                     self.current_q = q
@@ -386,22 +385,6 @@ class RobotMove:
                 print("Cant get to :", target_T)
                 return False
         return True
-
-    # def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
-    #     for i in range(16):
-    #         angle = np.pi * (2*i / 16)
-    #         z_rot = SE3(rotation = SO3().rz(angle))
-    #         # z_rot = SE3(rotation = puzzle_base.rotation.inverse())
-    #         # print(z_rot)
-    #         # print(SE3(rotation = puzzle_base.rotation.inverse()))
-    #         seq = self.trajectory.to_puzzle_matrice(puzzle_base, matrices, z_rot)
-    #         seq.insert(0, seq[0] * SE3(translation = [0,0,-0.03]))
-    #         current_q = self.robot.get_q()
-
-    #         if self.seq_check(current_q, seq, CRC_OFF):
-    #             return seq
-
-    #     return None
 
     def valid_traj(self, puzzle_base : SE3, matrices : list, main_points_idx : list) -> None | list:
         new_seq = []
@@ -438,7 +421,6 @@ class RobotMove:
                     angle_seq_seg = self.trajectory.generate_segment(T_start, T_end, num_points=diff_angle_idx + 2)
                     old_seq_seg = seq_segment[1:]
                     seq_segment = list(angle_seq_seg[1:]) + list(old_seq_seg)
-                #todo seq_segment[1:] nebude fungovat pokud nejsem na zacatku i == 0
                 start_idx = 2 if i == 0 else 0
                 if self.seq_check(seq_segment[start_idx:], CRC_OFF, coli_seq ,True):
                     new_seq.extend(seq_segment[:])
@@ -449,13 +431,8 @@ class RobotMove:
                 return None  
 
         return new_seq
-    
-
 
     def go_traj(self, seq : SE3, CRC_OFF) -> bool:
-        # if seq == None:
-        #     print("WARN: No trajectory found!")
-        #     return
 
         if seq is not None and len(self.q_seq) == 0 :
             print("WARN: No trajectory found!")

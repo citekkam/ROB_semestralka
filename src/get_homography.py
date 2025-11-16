@@ -13,6 +13,7 @@ H_load = hm.get_H()
 print(H, H_load)
 
 our_robot.robot.soft_home()
+
 # our_robot.robot.soft_home()
 
 # img = our_robot.robot.grab_image()

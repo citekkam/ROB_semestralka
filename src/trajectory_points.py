@@ -16,19 +16,7 @@ from so3 import SO3
 from utils import print_trajectory_info
 
 
-# Rotation matrix with diagonal elements [-1, 1, -1]
-# # This represents a 180° rotation around Y-axis
-# ROTATION_MATRIX = np.array([
-#     [-1.0,  0.0,  0.0],
-#     [ 0.0,  1.0,  0.0],
-#     [ 0.0,  0.0, -1.0]
-# ])
-
-# # Create the constant rotation as SO3 object
-# ROTATION = SO3(ROTATION_MATRIX)
-
-
-ROTATION = SO3() # 180° rotation around Y-axis
+ROTATION = SO3()
 
 # ========== PUZZLE A TRAJECTORY ==========
 # Define trajectory points for Puzzle A as SE3 objects (global constants)

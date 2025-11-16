@@ -4,7 +4,7 @@ Collision Testing for Robot Trajectories
 =========================================
 Class-based collision testing using Pinocchio with trajectory spheres.
 
-Author: David
+Author: Xuan Dinh Nguyen
 Date: 2025-11-06
 """
 
@@ -161,7 +161,7 @@ class Collision:
         # Create geometry data
         self.geom_data = pin.GeometryData(self.collision_model)
     
-    def add_aruco_sphere(self, pose: SE3, radius: float = 0.08, height: float = 0.02,
+    def add_aruco_cylinder(self, pose: SE3, radius: float = 0.08, height: float = 0.02,
                          name_suffix: str = "aruco",
                          color=(0.2, 0.8, 0.2, 1)) -> tuple:
         """
@@ -339,7 +339,7 @@ class Collision:
             # Póza ArUco se odvozuje z posledního SE3 trajektorie (ne z vnitřní proměnné)
             last_pose = self.aruco_pose
             self.aruco_pose = self.compute_aruco_pose(last_pose, offset=aruco_offset, axis=aruco_axis)
-            self.add_aruco_sphere(self.aruco_pose, radius=aruco_radius, height=aruco_height)
+            self.add_aruco_cylinder(self.aruco_pose, radius=aruco_radius, height=aruco_height)
 
         self.setup_collision_pairs()
         return self.is_in_collision(q)

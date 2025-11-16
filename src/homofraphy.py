@@ -125,7 +125,6 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
 
     for i in range(len(images)):
         img = images[i]
-        # todo HW03: Detect circle in each image
         img_gray_aruco = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         img_gray = cv2.medianBlur(img_gray_aruco, 5)
@@ -137,8 +136,6 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
         # cv2.imshow("gray", img_gray)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
-
-
 
         circles = cv2.HoughCircles(img_gray, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                 param1=120, param2=33,
@@ -159,16 +156,12 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
             hoop_vectors = np.delete(hoop_vectors, i, axis=0)
             print(f"None or more than one circle detected in image {i}!")
 
-
-
-
         # show_img = cv2.resize(img_gray, (1200, 800))
         # show_img = cv2.resize(img, (1200, 800))
         # cv2.imshow(f"detected circles {i}", show_img)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-    # todo HW03: Find homography using cv2.findHomography. Use the hoop positions and circle centers.
 
     # print(hoop_positions)
 
@@ -208,7 +201,6 @@ def get_aruco_center(corners : ArrayLike, img = None) -> List[np.ndarray]:
     """
     Get the center position of the aruco markers using the homography H.
     """
-    ## TODO Implement correctly
     positions = []
     for c in corners:
         c = c[0]
@@ -222,7 +214,6 @@ def get_aruco_center(corners : ArrayLike, img = None) -> List[np.ndarray]:
 
     return positions
 
-## TODO move to tranformations.py
 def get_puzzle_base(aruco_ids: List[int], aruco_corners: List[np.ndarray], H : np.ndarray ,img = None):
     """
     Returns SE3 of puzzle base
