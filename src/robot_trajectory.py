@@ -265,7 +265,7 @@ class RobotTrajectory:
             List of SE3 objects representing the full trajectory
         """
         if len(self.waypoints) < 2:
-            print("⚠️  Need at least 2 waypoints to generate trajectory")
+            print("Need at least 2 waypoints to generate trajectory")
             return []
         
         self.trajectory = []
