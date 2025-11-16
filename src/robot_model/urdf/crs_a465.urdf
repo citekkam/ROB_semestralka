@@ -62,7 +62,8 @@
       <geometry>
       <mesh filename="meshes/brazo1.stl" scale="1 1 1"/>
       </geometry>
-      <material name="red"><color rgba="0.8 0.2 0.2 1" /></material>
+      <!-- <material name="yellow"><color rgba="0.9 0.9 0.2 1" /></material> -->
+      <material name="grey"><color rgba="0.6 0.6 0.6 1" /></material>
       <origin xyz="0 0 -0.065" rpy="1.57079632679 0 -1.57079632679"/>
     </visual>
     <collision>
@@ -87,7 +88,8 @@
       <mesh filename="meshes/anexo_brazo2.stl" scale="1 1 1"/>
       </geometry>
       <origin xyz="0 0 -0.05" rpy="1.57079632679 0 -1.57079632679"/>
-      <material name="green"><color rgba="0.2 0.8 0.2 1" /></material>
+      <!-- <material name="green"><color rgba="0.2 0.8 0.2 1" /></material> -->
+      <material name="blue"><color rgba="0.2 0.2 0.8 1" /></material>
     </visual>
     <collision>
       <geometry>
@@ -113,7 +115,8 @@
       <mesh filename="meshes/brazo2_sin_herramienta.stl" scale="1 1 1"/>
       </geometry>
       <origin xyz="0 0 0.1016" rpy="1.57079632679 0 0"/>
-      <material name="orange"><color rgba="0.9 0.5 0.2 1" /></material>
+      <!-- <material name="orange"><color rgba="0.9 0.5 0.2 1" /></material> -->
+      <material name="grey"><color rgba="0.6 0.6 0.6 1" /></material>
     </visual>
     <collision>
       <geometry>
@@ -138,7 +141,7 @@
       <mesh filename="meshes/union_herramienta.stl" scale="1 1 1"/>
       </geometry>
       <origin xyz="0 0 -0.026795" rpy="1.57079632679 0 -1.57079632679"/>
-      <material name="black"><color rgba="0.1 0.1 0.1 1" /></material>
+      <material name="blue"><color rgba="0.2 0.2 0.8 1" /></material>
     </visual>
     <collision>
       <geometry>
@@ -163,7 +166,8 @@
         <mesh filename="meshes/herramienta.stl" scale="1 1 1"/>
       </geometry>
       <origin xyz="0 0 0.0755" rpy="-1.57079632679 0 0"/>
-      <material name="silver"><color rgba="0.8 0.8 0.8 1" /></material>
+      <!-- <material name="silver"><color rgba="0.8 0.8 0.8 1" /></material> -->
+      <material name="grey"><color rgba="0.6 0.6 0.6 1" /></material>
     </visual>
     <collision>
       <geometry>

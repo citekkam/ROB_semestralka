@@ -60,23 +60,22 @@ class Collision:
         #       f"{len(self.collision_model.geometryObjects)} collision objects")
     
     def add_sphere(self, position: np.ndarray, radius: float = 0.05, 
-                   name_suffix: str = "", offset: SE3 = None) -> tuple:
+                   name_suffix: str = "", offset: SE3 = None,
+                   color=(1.0, 0.2, 0.2, 0.6)) -> tuple:
         """
         Add collision and visual sphere at given position.
-        
+
         Args:
             position: 3D position [x, y, z]
-            radius: Sphere radius in meters (default: 0.05)
+            radius: Sphere radius
             name_suffix: Unique name suffix
-            offset: Optional SE3 transformation to apply
-        
-        Returns:
-            Tuple of (collision_object, visual_object)
+            offset: Optional SE3 transform
+            color: RGBA tuple for visualization (default: semi-transparent red)
         """
         # Apply offset if provided
         if offset is not None:
             position = offset.act(position)
-        
+
         # Create sphere geometry
         sphere_geom = hppfcl.Sphere(radius)
         sphere_pose = pin.SE3(np.eye(3), position)
@@ -89,8 +88,6 @@ class Collision:
             sphere_pose,
             sphere_geom
         )
-        self.collision_model.addGeometryObject(sphere_collision)
-        
         # Add visual sphere
         sphere_visual = pin.GeometryObject(
             f"sphere_visual_{name_suffix}",
@@ -98,6 +95,9 @@ class Collision:
             sphere_pose,
             sphere_geom
         )
+        sphere_visual.meshColor = np.array(color)
+
+        self.collision_model.addGeometryObject(sphere_collision)
         self.visual_model.addGeometryObject(sphere_visual)
         
         return sphere_collision, sphere_visual
@@ -161,10 +161,10 @@ class Collision:
         # Create geometry data
         self.geom_data = pin.GeometryData(self.collision_model)
     
-    def add_aruco_sphere(self, pose: SE3, radius: float = 0.18, height: float = 0.02, name_suffix: str = "aruco") -> tuple:
+    def add_aruco_sphere(self, pose: SE3, radius: float = 0.08, height: float = 0.02, name_suffix: str = "aruco") -> tuple:
         """
-        Přidá ArUco jako jeden válec (kolizní + vizuální) se stejným způsobem vložení pózy jako u sfér.
-        Pozn.: hppfcl.Cylinder očekává poloviční délku (half-length).
+        Přidá ArUco válec (kolizní + vizuální).
+        color: RGBA for visual cylinder.
         """
         position = pose.translation
         # Cylinder aligned with world Z (stejně jako sféra používá identickou rotaci = I)
@@ -173,6 +173,7 @@ class Collision:
 
         col = pin.GeometryObject(f"aruco_collision_{name_suffix}", 0, cylinder_pose, cylinder_geom)
         vis = pin.GeometryObject(f"aruco_visual_{name_suffix}", 0, cylinder_pose, cylinder_geom)
+        vis.meshColor = np.array(color)
 
         self.collision_model.addGeometryObject(col)
         self.visual_model.addGeometryObject(vis)
@@ -322,7 +323,7 @@ class Collision:
             print(f"⚠️  Viewer error: {e}")
 
     def in_collision(self, q: np.ndarray, traj: list, radius: float = 0.007, offset: SE3 = None,
-                     add_aruco: bool = True, aruco_radius: float = 0.28, aruco_height: float = 0.02,
+                     add_aruco: bool = True, aruco_radius: float = 0.08, aruco_height: float = 0.02,
                      aruco_offset: float = 0.01, aruco_axis: str = "-z") -> bool:
         """
         Volitelně přidá ArUco sférický model odvozený z posledního bodu trajektorie.
@@ -353,7 +354,7 @@ def main():
     # Define offset transformation
     offset = SE3(
         rotation=SO3.rz(np.pi),
-        translation=np.array([0.45, -0.15, 0.05])
+        translation=np.array([0.485, -0.15, 0.05])
     )
     
     # Get trajectory for specific puzzles
