@@ -40,7 +40,6 @@ class RobotMove:
         self.collision = Collision()
         self.current_q = self.robot.get_q()
         self.q_seq = []
-        
         self.current_q_seq = []
     
     @classmethod
@@ -188,7 +187,7 @@ class RobotMove:
         ik_solutions = self.robot.ik(target_T)
         
         if len(ik_solutions) == 0:
-            print(f"⚠️  No IK solutions found for target transformation")
+            print(f"No IK solutions found for target transformation")
             return False
         
         # print(f"Found {len(ik_solutions)} IK solutions")
@@ -211,7 +210,7 @@ class RobotMove:
             self.robot.wait_for_motion_stop()
             return True
         
-        print("❌ No valid configuration found within robot limits")
+        print("No valid configuration found within robot limits")
         return False
     
     def calibration_move(self, positions_file: str, soft_home: bool = True) -> tuple:
@@ -350,7 +349,7 @@ class RobotMove:
                 return False
 
 
-        if pair_err_check[0] == True or pair_err_check[1] == True: # for q 0 and 2 or 3 and 4 or 0 or 1 
+        if pair_err_check[0] == True or pair_err_check[1] == True: 
             return False
         if pair_err_check[0] == True and pair_err_check[2] == True:
             return False
@@ -384,9 +383,7 @@ class RobotMove:
         return False, None
     
     def seq_check (self, seq: list, CRC_OFF, coli_seq, check_angle = True) -> bool:
-        # print("target T : ", seq[0] * CRC_OFF.inverse())
-        # print("seq :", *seq, sep="\n")
-        # print(seq)
+
         self.current_q_seq = []
 
         for T in seq:
@@ -463,6 +460,7 @@ class RobotMove:
 
 
         for q in self.q_seq:
+            # print("q", q)
             self.robot.move_to_q(q)
             self.robot.wait_for_motion_stop()
             
